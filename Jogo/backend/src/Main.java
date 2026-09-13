@@ -9,10 +9,8 @@ import java.nio.file.Path;
 
 public class Main {
 
-    private static int playerX = 100;
-    private static int playerY = 100;
-
     private static Zombie zumbi = new Zombie(500, 300);
+    private static Player player = new Player(100, 100);
 
     public static void main(String[] args) throws Exception {
 
@@ -33,7 +31,7 @@ public class Main {
 
     while (true) {
 
-        zumbi.moverEmDirecao(playerX, playerY);
+        zumbi.moverEmDirecao(player.getX(), player.getY());
 
         try {
             Thread.sleep(50);
@@ -129,18 +127,19 @@ jogo.start();
                     StandardCharsets.UTF_8
             ).trim().toUpperCase();
 
-            moverJogador(comando);
+            player.movimentacaoSurviver(comando);
         }
 
-        String resposta =
-        "{ \"x\": " + playerX +
-        ", \"y\": " + playerY +
-        ", \"zumbiX\": " + zumbi.x +
-        ", \"zumbiY\": " + zumbi.y +
+      String resposta =
+        "{ \"x\": " + player.getX() +
+        ", \"y\": " + player.getY() +
+        ", \"zumbiX\": " + (int) zumbi.getX() +
+        ", \"zumbiY\": " + (int) zumbi.getY() +
+        ", \"pontosVida\": " + (int) player.getPontosVida() +
         " }";
 
         byte[] dados = resposta.getBytes(StandardCharsets.UTF_8);
-
+                         
         exchange.getResponseHeaders()
                 .set("Content-Type", "application/json");
 
@@ -154,50 +153,4 @@ jogo.start();
 
         exchange.close();
     }
-
-    private static void moverJogador(String comando) {
-
-        int velocidade = 10;
-
-        switch (comando) {
-
-            case "W":
-                playerY -= velocidade;
-                break;
-
-            case "S":
-                playerY += velocidade;
-                break;
-
-            case "A":
-                playerX -= velocidade;
-                break;
-
-            case "D":
-                playerX += velocidade;
-                break;
-        }
-
-        
-        //tamanho da tela que da pra mecher esse trem vermelho
-        int larguraMax = 1900 - 50;
-        int alturaMax = 1060 - 70;
-
-        if (playerX < 0) {
-            playerX = 0;
-        }
-
-        if (playerY < 0) {
-            playerY = 0;
-        }
-
-        if (playerX > larguraMax) {
-            playerX = larguraMax;
-        }
-
-        if (playerY > alturaMax) {
-            playerY = alturaMax;
-        }
-    }
-
 }

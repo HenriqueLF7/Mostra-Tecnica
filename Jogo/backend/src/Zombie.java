@@ -1,9 +1,9 @@
 public class Zombie {
 
-    int x;
-    int y;
-
-    int velocidade;
+    private int x;
+    private int y;
+    private int velocidade;
+    private boolean vida = true;
 
     public Zombie(int x, int y) {
         this.x = x;
@@ -11,22 +11,20 @@ public class Zombie {
         this.velocidade = 2;
     }
 
-    public void moverEmDirecao(int alvoX, int alvoY) {
+    int getX() {
+        return x;
+    }
 
-        if (x < alvoX) {
-            x += velocidade;
-        }
+    int getY() {
+        return y;
+    }
 
-        if (x > alvoX) {
-            x -= velocidade;
-        }
+public void moverEmDirecao(int alvoX, int alvoY) {
 
-        if (y < alvoY) {
-            y += velocidade;
-        }
-
-        if (y > alvoY) {
-            y -= velocidade;
-        }
+    if (!vida) return;
+        if (x < alvoX) x += velocidade;
+        if (x > alvoX) x -= velocidade;
+        if (y < alvoY) y += velocidade;
+        if (y > alvoY) y -= velocidade;
     }
 }
