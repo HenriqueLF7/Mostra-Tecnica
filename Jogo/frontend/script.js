@@ -36,6 +36,39 @@ document.addEventListener("keyup", function (event) {
   if (tecla === "d") teclas.d = false;
 });
 
+// --- Direção pelo mouse (mira) ---
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+
+document.addEventListener("mousemove", function (event) {
+  mouseX = event.clientX;
+  mouseY = event.clientY;
+  atualizarDirecaoPeloMouse();
+});
+
+function atualizarDirecaoPeloMouse() {
+  // metade da largura/altura do player, baseado nos mesmos valores
+  // usados no clamp (90 de largura, 100 de altura)
+  const centroX = playerX + 45;
+  definirDirecao(mouseX < centroX ? "esquerda" : "direita");
+}
+
+document.addEventListener("mousedown", function (event) {
+  if (event.button !== 0) return;
+
+  const centroX = playerX + 45;
+  const ladoMira = mouseX < centroX ? "esquerda" : "direita";
+
+  player.classList.add("mirando");
+  player.classList.toggle("mirando-esquerda", ladoMira === "esquerda");
+  player.classList.toggle("mirando-direita", ladoMira === "direita");
+});
+
+document.addEventListener("mouseup", function (event) {
+  if (event.button !== 0) return;
+
+  player.classList.remove("mirando", "mirando-esquerda", "mirando-direita");
+});
 
 const spriteAndando = new Image();
 spriteAndando.src = "Imagens/player.png";
@@ -58,8 +91,8 @@ function definirEstado(estado) {
 
   if (estado === "idle") {
     frameAtual = 0;
-    direcaoAtual = null;
-    player.style.transform = "scaleX(1)";
+    // a direção NÃO é mais resetada aqui: o personagem continua
+    // olhando para onde o mouse está, mesmo parado
   }
 }
 
@@ -75,14 +108,10 @@ function atualizarFrame() {
 }
 
 setInterval(function () {
-  const indoDireita = teclas.d;
-  const indoEsquerda = teclas.a;
-  const estaAndando = indoDireita || indoEsquerda;
+  const estaAndando = teclas.w || teclas.a || teclas.s || teclas.d;
 
   if (estaAndando) {
     definirEstado("andando");
-    definirDirecao(indoDireita ? "direita" : "esquerda");
-
     frameAtual = (frameAtual + 1) % FRAME_COLS;
     atualizarFrame();
   } else {
@@ -90,19 +119,24 @@ setInterval(function () {
   }
 }, VELOCIDADE_ANIMACAO);
 
-function enviarComando(comando) {
+// --- Envio de comandos, agora com trava por eixo pra evitar empilhar requisições ---
+let enviandoVertical = false;
+let enviandoHorizontal = false;
 
-    const corpo = comando + ";" + window.innerWidth + ";" + window.innerHeight;
+function enviarComando(comando, eixo) {
+  const emAndamento = eixo === "vertical" ? enviandoVertical : enviandoHorizontal;
+  if (emAndamento) return; // já tem uma requisição desse eixo em voo, não manda outra
 
-    fetch("/player", {
+  if (eixo === "vertical") enviandoVertical = true;
+  else enviandoHorizontal = true;
 
-        method: "POST",
-        body: corpo
+  const corpo = comando + ";" + window.innerWidth + ";" + window.innerHeight;
 
-    })
-
-    .then(response => response.json())
-
+  fetch("/player", {
+    method: "POST",
+    body: corpo,
+  })
+    .then((response) => response.json())
     .then((data) => {
       if (data && typeof data.x === "number" && typeof data.y === "number") {
         const larguraMax = window.innerWidth - 90;
@@ -113,6 +147,11 @@ function enviarComando(comando) {
 
         atualizarTela();
       }
+    })
+    .catch((erro) => console.error("Erro ao enviar comando:", erro))
+    .finally(() => {
+      if (eixo === "vertical") enviandoVertical = false;
+      else enviandoHorizontal = false;
     });
 }
 
@@ -122,9 +161,17 @@ function atualizarTela() {
 
   zumbi.style.left = zumbiX + "px";
   zumbi.style.top = zumbiY + "px";
+
+  atualizarDirecaoPeloMouse();
 }
 
+// --- Busca de estado, também com trava para não empilhar ---
+let buscandoEstado = false;
+
 setInterval(function () {
+  if (buscandoEstado) return;
+  buscandoEstado = true;
+
   fetch("/player")
     .then((response) => response.json())
     .then((data) => {
@@ -143,20 +190,24 @@ setInterval(function () {
       }
 
       atualizarTela();
+    })
+    .catch((erro) => console.error("Erro ao buscar estado:", erro))
+    .finally(() => {
+      buscandoEstado = false;
     });
 }, 50);
 
 setInterval(function () {
   if (teclas.w) {
-    enviarComando("W");
+    enviarComando("W", "vertical");
   } else if (teclas.s) {
-    enviarComando("S");
+    enviarComando("S", "vertical");
   }
 
   if (teclas.a) {
-    enviarComando("A");
+    enviarComando("A", "horizontal");
   } else if (teclas.d) {
-    enviarComando("D");
+    enviarComando("D", "horizontal");
   }
 }, 50);
 
@@ -215,39 +266,39 @@ const intervaloCronometro = setInterval(function () {
   // Mostra na tela
   cronometro.textContent = minutosFormatados + ":" + segundosFormatados;
 
-  // =============================
-  // 2 MINUTOS
-  // =============================
+  // VERDE
 
-  if (tempo >= 120) {
-    cronometro.style.color = "yellow";
-
-    cronometro.style.border = "1px solid yellow";
-
-    cronometro.style.transition = "0.50s";
-
-    cronometro.style.boxShadow = "inset 0 3px 20px rgba(230, 226, 2, 0.747)";
+  if (tempo < 90) {
+cronometro.style.color = "#00d92e";
+cronometro.style.boxShadow =
+  "0 0 0 2px #006807, 0 0 0 5px #000000, inset 3px 3px 0 #06411a, inset -3px -3px 0 #050505";
+cronometro.style.setProperty("--cor-alerta", "#006807");
+cronometro.style.boxShadow.opacity = 0.50;
   }
 
-  // =============================
-  // 2:30
-  // =============================
+  // AMARELO
 
-  if (tempo >= 150) {
-    cronometro.style.color = "red";
-
-    cronometro.style.border = "1px solid red";
-
-    cronometro.style.transition = "0.50s";
-
-    cronometro.style.boxShadow = "inset 0 3px 20px rgba(230, 2, 2, 0.75)";
+  if (tempo >= 35) {
+cronometro.style.color = "#ffb020";
+cronometro.style.boxShadow =
+  "0 0 0 2px #ffb020, 0 0 0 5px #000000, inset 3px 3px 0 #7a4a00, inset -3px -3px 0 #050505";
+cronometro.style.setProperty("--cor-alerta", "#ffb020");
+cronometro.style.boxShadow.opacity = 0.50;
   }
 
-  // =============================
-  // 3 MINUTOS
-  // =============================
+  // VERMELHO
 
-  if (tempo >= 180) {
+  if (tempo >= 70) {
+cronometro.style.color = "#ff2d2d";
+cronometro.style.boxShadow =
+  "0 0 0 2px #ff2d2d, 0 0 0 5px #000000, inset 3px 3px 0 #4a0000, inset -3px -3px 0 #050505";
+cronometro.style.setProperty("--cor-alerta", "#ff2d2d");
+cronometro.style.boxShadow.opacity = 0.50;
+  }
+
+  // FIM!
+
+  if (tempo >= 110) {
     clearInterval(intervaloCronometro);
 
     cronometro.textContent = "TEMPO ESGOTADO!";
