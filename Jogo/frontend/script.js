@@ -37,11 +37,17 @@ document.addEventListener("keyup", function (event) {
 });
 
 function enviarComando(comando) {
-  fetch("/player", {
-    method: "POST",
-    body: comando,
-  })
-    .then((response) => response.json())
+
+    const corpo = comando + ";" + window.innerWidth + ";" + window.innerHeight;
+
+    fetch("/player", {
+
+        method: "POST",
+        body: corpo
+
+    })
+
+    .then(response => response.json())
 
     .then((data) => {
       if (data && typeof data.x === "number" && typeof data.y === "number") {

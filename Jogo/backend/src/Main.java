@@ -44,7 +44,7 @@ public class Main {
 
 jogo.start();
 
-        System.out.println("ta funcion ando porra");
+        System.out.println("ta funcionando porra");
         System.out.println("http://localhost:8080");
     }
 
@@ -117,18 +117,23 @@ jogo.start();
         exchange.close();
     }
 
-    private static void player(HttpExchange exchange)
-            throws IOException {
+    private static void player(HttpExchange exchange) throws IOException {
 
-        if (exchange.getRequestMethod().equals("POST")) {
+if (exchange.getRequestMethod().equals("POST")) {
 
-            String comando = new String(
-                    exchange.getRequestBody().readAllBytes(),
-                    StandardCharsets.UTF_8
-            ).trim().toUpperCase();
+    String corpo = new String(
+            exchange.getRequestBody().readAllBytes(),
+            StandardCharsets.UTF_8
+    ).trim();
 
-            player.movimentacaoSurviver(comando);
-        }
+    String[] partes = corpo.split(";");
+
+    String comando = partes[0].toUpperCase();
+    int larguraJanela = Integer.parseInt(partes[1]);
+    int alturaJanela = Integer.parseInt(partes[2]);
+
+    player.movimentacaoPlayer (comando, larguraJanela, alturaJanela);
+}
 
       String resposta =
         "{ \"x\": " + player.getX() +

@@ -37,32 +37,32 @@ public class Player {
         return vida;
     }
 
-    public void movimentacaoSurviver(String comando) {
+public void movimentacaoPlayer(String comando, int larguraJanela, int alturaJanela) {
 
-        if (!vida) return;
+    if (!vida) return;
 
-        switch (comando) {
-            case "W":
-                y -= velocidade;
-                break;
-            case "S":
-                y += velocidade;
-                break;
-            case "A":
-                x -= velocidade;
-                break;
-            case "D":
-                x += velocidade;
-                break;
-        }
+    switch (comando) {
+        case "W":
+            y -= velocidade;
+            break;
+        case "S":
+            y += velocidade;
+            break;
+        case "A":
+            x -= velocidade;
+            break;
+        case "D":
+            x += velocidade;
+            break;
+    }
 
-        // Limita a movimentação dentro do mapa
-        int larguraMax = 1900 - 50;
-        int alturaMax = 1060 - 70;
+    // Limita a movimentação dentro da janela atual do navegador
+    int larguraMax = larguraJanela - 50;
+    int alturaMax = alturaJanela - 70;
 
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > larguraMax) x = larguraMax;
-        if (y > alturaMax) y = alturaMax;
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x > larguraMax) x = larguraMax;
+    if (y > alturaMax) y = alturaMax;
     }
 }
