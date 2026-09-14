@@ -57,8 +57,8 @@ public void movimentacaoPlayer(String comando, int larguraJanela, int alturaJane
     }
 
     // Limita a movimentação dentro da janela atual do navegador
-    int larguraMax = larguraJanela - 50;
-    int alturaMax = alturaJanela - 70;
+    int larguraMax = larguraJanela - 90;
+    int alturaMax = alturaJanela - 100;
 
     if (x < 0) x = 0;
     if (y < 0) y = 0;

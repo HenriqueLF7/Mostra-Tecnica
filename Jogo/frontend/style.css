@@ -59,15 +59,29 @@ body {
 }
 
 #player {
-  width: 50px;
-  height: 70px;
-
-  background-image: url(Imagens/fundo.jpeg);
+  width: 90px;
+  height: 100px;
 
   position: absolute;
 
   left: 100px;
   top: 100px;
+
+  background-repeat: no-repeat;
+  transform-origin: center;
+  transition: transform 0.08s linear;
+  transform: scaleX(1);
+}
+
+#player.idle {
+  background-image: url("Imagens/idle.png");
+  background-size: 100% 100%;
+  background-position: 0% 0%;
+}
+
+#player.andando {
+  background-image: url("Imagens/player.png");
+  background-size: 800% 100%;
 }
 
 /* ========================= */
@@ -186,3 +200,20 @@ body {
 
   box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
 }
+
+#arma {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 5px;
+
+  background: #555;
+  border: 1px solid black;
+
+  transform-origin: left center;
+  transform: translate(0, -50%);
+
+  z-index: 5;
+}
+

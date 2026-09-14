@@ -36,6 +36,60 @@ document.addEventListener("keyup", function (event) {
   if (tecla === "d") teclas.d = false;
 });
 
+
+const spriteAndando = new Image();
+spriteAndando.src = "Imagens/player.png";
+const spriteParado = new Image();
+spriteParado.src = "Imagens/idle.png";
+
+const FRAME_COLS = 8;
+const VELOCIDADE_ANIMACAO = 90;
+
+let frameAtual = 0;
+let estadoAtual = null;
+let direcaoAtual = null;
+
+function definirEstado(estado) {
+  if (estado === estadoAtual) return;
+  estadoAtual = estado;
+
+  player.classList.toggle("idle", estado === "idle");
+  player.classList.toggle("andando", estado === "andando");
+
+  if (estado === "idle") {
+    frameAtual = 0;
+    direcaoAtual = null;
+    player.style.transform = "scaleX(1)";
+  }
+}
+
+function definirDirecao(direcao) {
+  if (direcao === direcaoAtual) return;
+  direcaoAtual = direcao;
+  player.style.transform = direcao === "esquerda" ? "scaleX(-1)" : "scaleX(1)";
+}
+
+function atualizarFrame() {
+  const colPercent = (frameAtual / (FRAME_COLS - 1)) * 100;
+  player.style.backgroundPosition = colPercent + "% 0%";
+}
+
+setInterval(function () {
+  const indoDireita = teclas.d;
+  const indoEsquerda = teclas.a;
+  const estaAndando = indoDireita || indoEsquerda;
+
+  if (estaAndando) {
+    definirEstado("andando");
+    definirDirecao(indoDireita ? "direita" : "esquerda");
+
+    frameAtual = (frameAtual + 1) % FRAME_COLS;
+    atualizarFrame();
+  } else {
+    definirEstado("idle");
+  }
+}, VELOCIDADE_ANIMACAO);
+
 function enviarComando(comando) {
 
     const corpo = comando + ";" + window.innerWidth + ";" + window.innerHeight;
@@ -51,8 +105,8 @@ function enviarComando(comando) {
 
     .then((data) => {
       if (data && typeof data.x === "number" && typeof data.y === "number") {
-        const larguraMax = window.innerWidth - 50;
-        const alturaMax = window.innerHeight - 70;
+        const larguraMax = window.innerWidth - 90;
+        const alturaMax = window.innerHeight - 100;
 
         playerX = Math.max(0, Math.min(data.x, larguraMax));
         playerY = Math.max(0, Math.min(data.y, alturaMax));
