@@ -298,7 +298,7 @@ cronometro.style.boxShadow.opacity = 0.50;
 
   // FIM!
 
-  if (tempo >= 110) {
+  if (tempo >= 0) {
     clearInterval(intervaloCronometro);
 
     cronometro.textContent = "TEMPO ESGOTADO!";

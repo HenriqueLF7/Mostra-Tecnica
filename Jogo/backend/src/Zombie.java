@@ -8,7 +8,7 @@ public class Zombie {
     public Zombie(int x, int y) {
         this.x = x;
         this.y = y;
-        this.velocidade = 20;
+        this.velocidade = 10;
     }
 
     int getX() {
