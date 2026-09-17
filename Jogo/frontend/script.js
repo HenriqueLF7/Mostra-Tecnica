@@ -325,6 +325,7 @@ const intervaloCronometro = setInterval(function () {
 }, 1000);
 
 btnRecomecar.addEventListener("click", function () {
+  reiniciarJogo();
   location.reload();
 });
 
@@ -336,6 +337,10 @@ function paraTelaInicial() {
   telaFim.style.display = "none";
   telaInicial.style.display = "flex";
 }
+
+// =============================
+// IR PARA TELA INICIAL
+// =============================
 
 // =============================
 // POSIÇÃO INICIAL

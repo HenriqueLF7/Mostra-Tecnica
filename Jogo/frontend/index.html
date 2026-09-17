@@ -8,6 +8,7 @@
     <title>Last Survivor</title>
 
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="Imagens/zumbimao.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 </head>
@@ -104,25 +105,78 @@
                     </div>
 
                     <div class="botao-voltar">
-                        <button type="submit" id="b2" name="b2" onclick="paraTelaInicial()">VOLTAR AO MENU</button>
+                        <button type="submit" id="btnRecomecar" name="b2"">COMEÇAR</button>
                     </div>
 
                 </div>
 
 
 
-                <div class="tabeladentro">
+                <div class=" tabeladentro">
 
-                    <div class="titulo-resultado">
-                        TABELA
-                    </div>
+                            <div class="titulo-resultado">
+                                RANKING DE SOBREVIVENTES
+                            </div>
 
-                    <div class="infoinicial">
+                            <div class="ranking-topo">
+                                <img src="Imagens/zumbimao.png" alt="zumbi">
+                                <div>
+                                    <span class="ranking-legenda">MELHORES PARTIDAS</span>
+                                    <strong>TOP 5</strong>
+                                </div>
+                            </div>
 
-                        <div class="kills-resultado">
-                            <img src="Imagens/zumbimao.png" alt="zumbi">
-                            <span>TABELA</span>
-                        </div>
+                            <div class="ranking-wrapper">
+                                <table class="ranking-tabela">
+
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>JOGADOR</th>
+                                            <th>TEMPO</th>
+                                            <th>KILLS</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr class="ranking-primeiro">
+                                            <td><span class="ranking-posicao">1</span></td>
+                                            <td>HENRIQUE</td>
+                                            <td>02:47</td>
+                                            <td>38</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="ranking-posicao">2</span></td>
+                                            <td>GABRIEL</td>
+                                            <td>02:31</td>
+                                            <td>34</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="ranking-posicao">3</span></td>
+                                            <td>ISAC</td>
+                                            <td>02:18</td>
+                                            <td>29</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="ranking-posicao">4</span></td>
+                                            <td>ROCHA</td>
+                                            <td>01:54</td>
+                                            <td>23</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="ranking-posicao">5</span></td>
+                                            <td>COLMAN</td>
+                                            <td>01:42</td>
+                                            <td>19</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="ranking-rodape">
+                                <span>SEU MELHOR:</span>
+                                <strong>--:--</strong>
+                            </div>
 
                     </div>
 
@@ -130,9 +184,7 @@
 
             </div>
 
-        </div>
-
-        <script src="script.js"></script>
+            <script src="script.js"></script>
 
 </body>
 
