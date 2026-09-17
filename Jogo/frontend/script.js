@@ -270,10 +270,10 @@ const intervaloCronometro = setInterval(function () {
   // VERDE
 
   if (tempo < 90) {
-    cronometro.style.color = "#00d92e";
+    cronometro.style.color = "#ffffff";
     cronometro.style.boxShadow =
-      "0 0 0 2px #006807, 0 0 0 5px #000000, inset 3px 3px 0 #06411a, inset -3px -3px 0 #050505";
-    cronometro.style.setProperty("--cor-alerta", "#006807");
+          "0 0 0 2px #42d624, 0 0 0 5px #000000, inset 3px 3px 0 #42d624, inset -3px -3px 0 #050505";
+    cronometro.style.setProperty("--cor-alerta", "#42d624");
     cronometro.style.boxShadow.opacity = 0.5;
   }
 
@@ -303,7 +303,7 @@ const intervaloCronometro = setInterval(function () {
     cronometro.style.animation = "tremor 1s infinite";
   }
 
-  if (tempo >= 0) {
+  if (tempo >= 90) {
     clearInterval(intervaloCronometro);
 
     cronometro.textContent = "TEMPO ESGOTADO!";
