@@ -39,7 +39,6 @@ body {
   z-index: 1000;
 }
 
-
 img {
   -webkit-user-drag: none;
   pointer-events: none;
@@ -133,7 +132,11 @@ img {
   background: #0e0e0e;
 
   border: 4px solid #000000;
-  box-shadow: 0 0 0 2px #006807, 0 0 0 5px #000000, inset 3px 3px 0 #06411a, inset -3px -3px 0 #050505;
+  box-shadow:
+    0 0 0 2px #006807,
+    0 0 0 5px #000000,
+    inset 3px 3px 0 #06411a,
+    inset -3px -3px 0 #050505;
 
   padding: 14px 22px;
 
@@ -145,7 +148,10 @@ img {
 
   cursor: crosshair;
 
-  text-shadow: 2px 2px 0 #000000, -2px 0 #ff003c, 2px 0 #00fff9;
+  text-shadow:
+    2px 2px 0 #000000,
+    -1.5px 0 #ff003c,
+    1.5px 0 #00fff9;
   letter-spacing: 2px;
 
   --cor-alerta: #006807;
@@ -162,14 +168,22 @@ img {
   pointer-events: none;
 
   background:
-    linear-gradient(to right, var(--cor-alerta) 3px, transparent 3px) top left / 16px 3px no-repeat,
-    linear-gradient(to bottom, var(--cor-alerta) 3px, transparent 3px) top left / 3px 16px no-repeat,
-    linear-gradient(to left, var(--cor-alerta) 3px, transparent 3px) top right / 16px 3px no-repeat,
-    linear-gradient(to bottom, var(--cor-alerta) 3px, transparent 3px) top right / 3px 16px no-repeat,
-    linear-gradient(to right, var(--cor-alerta) 3px, transparent 3px) bottom left / 16px 3px no-repeat,
-    linear-gradient(to top, var(--cor-alerta) 3px, transparent 3px) bottom left / 3px 16px no-repeat,
-    linear-gradient(to left, var(--cor-alerta) 3px, transparent 3px) bottom right / 16px 3px no-repeat,
-    linear-gradient(to top, var(--cor-alerta) 3px, transparent 3px) bottom right / 3px 16px no-repeat;
+    linear-gradient(to right, var(--cor-alerta) 3px, transparent 3px) top left /
+      16px 3px no-repeat,
+    linear-gradient(to bottom, var(--cor-alerta) 3px, transparent 3px) top
+      left / 3px 16px no-repeat,
+    linear-gradient(to left, var(--cor-alerta) 3px, transparent 3px) top right /
+      16px 3px no-repeat,
+    linear-gradient(to bottom, var(--cor-alerta) 3px, transparent 3px) top
+      right / 3px 16px no-repeat,
+    linear-gradient(to right, var(--cor-alerta) 3px, transparent 3px) bottom
+      left / 16px 3px no-repeat,
+    linear-gradient(to top, var(--cor-alerta) 3px, transparent 3px) bottom
+      left / 3px 16px no-repeat,
+    linear-gradient(to left, var(--cor-alerta) 3px, transparent 3px) bottom
+      right / 16px 3px no-repeat,
+    linear-gradient(to top, var(--cor-alerta) 3px, transparent 3px) bottom
+      right / 3px 16px no-repeat;
 
   animation: brilho 1.6s ease-in-out infinite;
 }
@@ -189,7 +203,6 @@ img {
 }
 
 @keyframes tremor {
-
   0%,
   96%,
   100% {
@@ -210,7 +223,6 @@ img {
 }
 
 @keyframes brilho {
-
   0%,
   100% {
     box-shadow: 0 0 20px 4px var(--cor-alerta);
@@ -224,7 +236,6 @@ img {
 }
 
 @keyframes falha {
-
   0%,
   92%,
   100% {
@@ -257,64 +268,83 @@ img {
 
 #telaFim {
   position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10000;
+  inset: 0;
+  z-index: 9999;
 
   width: 100%;
   height: 100%;
 
-  background: rgba(0, 0, 0, 0.767);
+  background:
+    radial-gradient(circle at center, rgba(120, 0, 0, 0.14), transparent 42%),
+    rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(4px);
 
   display: none;
-
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 22px;
 
-  z-index: 9999;
+  padding: 32px 18px;
+  overflow: hidden;
+
+  animation: telaFimEntrada 0.35s ease-out;
+}
+
+/* textura bem leve de monitor antigo */
+#telaFim::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(255, 255, 255, 0.08) 4px
+  );
 }
 
 #telaFim h1 {
-  top: 20%;
+  position: relative;
+  z-index: 1;
+
+  margin: 0;
+  padding: 0;
+
   font-family: "Press Start 2P", monospace;
-  margin-bottom: 30px;
-  align-self: center;
-  box-shadow: inset 0 2px 15px rgba(230, 2, 2, 0.75);
-  border-radius: 7px;
-  padding: 20px;
-  border: 1px solid red;
-  color: red;
-  font-size: auto;
+  color: #ff2d2d;
+  font-size: clamp(30px, 5vw, 58px);
+  line-height: 1.15;
+  letter-spacing: 4px;
   text-align: center;
+
+  text-shadow:
+    0 0 8px rgba(255, 45, 45, 0.7),
+    0 0 26px rgba(255, 0, 0, 0.28),
+    4px 4px 0 #350000;
+
+  animation: gameOverPulso 2.2s ease-in-out infinite;
 }
 
-#btnRecomecar {
-  display: inline-block;
-  margin-bottom: 200px;
-  place-self: center;
-  padding: 15px 35px;
-  background: linear-gradient(145deg,
-      #000000a1 0 9px,
-      rgba(4, 3, 10, 0.664) 9px 18px);
-  color: rgb(214, 0, 0);
-  box-shadow: "inset 0 3px 20px rgba(230, 2, 2, 0.75)";
-  border: 2px solid red;
-  border-radius: 8px;
-
-  font-size: 40px;
-  font-weight: bold;
-
-  cursor: pointer;
-
-  transition: 0.25s;
+@keyframes telaFimEntrada {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-#btnRecomecar:hover {
-  background: red;
-  color: white;
-
-  box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+@keyframes gameOverPulso {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 #arma {
@@ -333,81 +363,569 @@ img {
   z-index: 5;
 }
 
-.titulo-resultado {
-  color: #8e8e8e;
-  font-size: 11px;
-  letter-spacing: 3px;
-  margin-bottom: 8px;
-}
-
-#b2 {
-  font-family: "Press Start 2P", monospace;
-  width: 100%;
-  margin-top: 18px;
-  padding: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 9px;
-  background: #111;
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-#b2:hover {
-  transform: translateY(-3px);
-  border: 1px solid red;
-}
-
 .telafimdentro {
+  position: relative;
+  z-index: 1;
+
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+
+  width: min(620px, 92vw);
+  min-height: 420px;
+  padding: 34px;
+
+  overflow: hidden;
+  text-align: center;
   font-family: "Press Start 2P", monospace;
-  padding: 20px;
+
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 2px solid rgba(255, 45, 45, 0.8);
+  border-radius: 18px;
+
+  background: linear-gradient(180deg, #0c0c0c, #0d0d0d);
+
+  box-shadow:
+    0 26px 80px rgba(0, 0, 0, 0.7),
+    0 0 35px rgba(190, 0, 0, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* detalhe vermelho no topo do painel */
+.telafimdentro::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 70%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ff2d2d, transparent);
+  box-shadow: 0 0 18px rgba(255, 45, 45, 0.75);
+}
+
+.titulo-resultado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  margin: 0;
+  color: #f2f2f2;
+  font-size: clamp(13px, 2vw, 17px);
+  letter-spacing: 3px;
+}
+
+.titulo-resultado::before,
+.titulo-resultado::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25));
+}
+
+.titulo-resultado::after {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.25), transparent);
+}
+
+.info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.kills-resultado,
+.tempo-resultado {
+  position: relative;
+
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 16px;
+
+  min-height: 160px;
+  padding: 24px 18px;
+
+  color: #ececec;
+  font-size: clamp(12px, 1.7vw, 16px);
+  line-height: 1.6;
+  letter-spacing: 0.8px;
+
+  background: linear-gradient(145deg, #141414, #0d0d0d);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.28);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.kills-resultado:hover,
+.tempo-resultado:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 45, 45, 0.35);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 45, 45, 0.07),
+    rgba(255, 255, 255, 0.015)
+  );
+}
+
+.info img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(255, 45, 45, 0.22));
+}
+
+.botao-voltar {
+  width: 100%;
+}
+
+#b2 {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 18px 22px;
+
+  overflow: hidden;
+  cursor: pointer;
+
+  font-family: "Press Start 2P", monospace;
+  font-size: clamp(10px, 1.7vw, 14px);
+  letter-spacing: 1px;
+  color: #f2f2f2;
+
+  background: linear-gradient(180deg, #0c0c0c, #0d0d0d);
+  border: 1px solid rgba(255, 45, 45, 0.48);
+  border-radius: 10px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 5px 10px rgba(0, 0, 0, 0.3);
+
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+#b2:hover {
+  transform: translateY(-2px);
+  color: #ffffff;
+  border-color: #ff2d2d;
+  background: linear-gradient(180deg, #251111, #120909);
+  box-shadow:
+    0 0 0 1px rgba(255, 45, 45, 0.12),
+    0 10px 20px rgba(0, 0, 0, 0.288),
+    0 0 18px rgba(255, 45, 45, 0.16);
+}
+
+#b2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -35%;
+  width: 25%;
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.16),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: left 0.45s ease;
+}
+
+#b2:hover::before {
+  left: 110%;
+}
+
+#b2:active {
+  transform: translateY(0) scale(0.99);
+}
+
+@media (max-width: 620px) {
+  #telaFim {
+    gap: 16px;
+    padding: 22px 14px;
+  }
+
+  .telafimdentro {
+    min-height: auto;
+    padding: 24px 18px;
+    gap: 22px;
+  }
+
+  .info {
+    grid-template-columns: 1fr;
+  }
+
+  .kills-resultado,
+  .tempo-resultado {
+    min-height: 110px;
+    flex-direction: row;
+    padding: 18px;
+  }
+
+  .info img {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+/* =============================
+// TELA INICIAL
+/ ============================= */
+
+#telaInicial {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  width: 100%;
+  height: 100%;
+
+  background:
+    radial-gradient(circle at center, rgba(120, 0, 0, 0.14), transparent 42%),
+    rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(4px);
+
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+
+  padding: 32px 18px;
+  overflow: hidden;
+
+  animation: telaFimEntrada 0.35s ease-out;
+}
+
+/* textura bem leve de monitor antigo */
+#telaInicial::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(255, 255, 255, 0.08) 4px
+  );
+}
+
+#telaInicial h1 {
+  position: relative;
+  z-index: 1;
+
+  margin: 0;
+  padding: 0;
+
+  font-family: "Press Start 2P", monospace;
+  color: #ff2d2d;
+  font-size: clamp(30px, 5vw, 58px);
+  line-height: 1.15;
+  letter-spacing: 4px;
   text-align: center;
-   width: 580px;
-  height: 600px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 30px;
-   background: linear-gradient(145deg,
-      #000000b0 0 9px,
-      rgba(0, 0, 0, 0.658) 9px 18px);
-  ;
+
+  text-shadow:
+    0 0 8px rgba(255, 45, 45, 0.7),
+    0 0 26px rgba(255, 0, 0, 0.28),
+    4px 4px 0 #350000;
+
+  animation: gameOverPulso 2.2s ease-in-out infinite;
 }
 
-#telafimdentro {
+.telainicialdentro {
+  position: relative;
+  z-index: 1;
+
   display: flex;
-  justify-content: space-between;
   flex-direction: column;
-  padding: 20px;
-    background: linear-gradient(145deg,
-      #0000005d 0 9px,
-      rgba(0, 0, 0, 0.342) 9px 18px);
-  border-radius: 20px;
-  width: 580px;
-  height: 600px;
+  gap: 28px;
+
+  width: min(620px, 92vw);
+  min-height: 538px;
+  padding: 34px;
+
+  overflow: hidden;
+  text-align: center;
+  font-family: "Press Start 2P", monospace;
+
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 2px solid rgba(255, 45, 45, 0.8);
+  border-radius: 18px;
+
+  background: linear-gradient(180deg, #0c0c0c, #0d0d0d);
+
+  box-shadow:
+    0 26px 80px rgba(0, 0, 0, 0.7),
+    0 0 35px rgba(190, 0, 0, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.kills-resultado {
-  color: #b1b0b0;
+/* detalhe vermelho no topo do painel */
+.telainicialdentro::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 70%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ff2d2d, transparent);
+  box-shadow: 0 0 18px rgba(255, 45, 45, 0.75);
+}
+
+.infoinicial img {
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(255, 45, 45, 0.22));
+}
+
+.masculino,
+.feminino {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+
+  min-height: 160px;
+  padding: 24px 18px;
+
+  color: #ececec;
+  font-size: clamp(12px, 1.7vw, 16px);
+  line-height: 1.6;
+  letter-spacing: 0.8px;
+
+  background: linear-gradient(145deg, #141414, #0d0d0d);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.28);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.masculino:hover,
+.feminino:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 45, 45, 0.35);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 45, 45, 0.07),
+    rgba(255, 255, 255, 0.015)
+  );
+}
+
+/* ----------------------------------------------- */
+
+#telaInicial {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  width: 100%;
+  height: 100%;
+
+  background:
+    radial-gradient(circle at center, rgba(120, 0, 0, 0.14), transparent 42%),
+    rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  gap: 22px;
+
+  padding: 32px 18px;
+  overflow: hidden;
+
+  animation: telaFimEntrada 0.35s ease-out;
+}
+
+/* textura bem leve de monitor antigo */
+#telaInicial::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(255, 255, 255, 0.08) 4px
+  );
+}
+
+#telaInicial h1 {
+  position: relative;
+  z-index: 1;
+
+  margin: 0;
+  padding: 0;
+
+  font-family: "Press Start 2P", monospace;
+  color: #ff2d2d;
+  font-size: clamp(30px, 5vw, 58px);
+  line-height: 1.15;
+  letter-spacing: 4px;
+  text-align: center;
+
+  text-shadow:
+    0 0 8px rgba(255, 45, 45, 0.7),
+    0 0 26px rgba(255, 0, 0, 0.28),
+    4px 4px 0 #350000;
+
+  animation: gameOverPulso 2.2s ease-in-out infinite;
+}
+
+.tabeladentro {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+
+  width: min(620px, 92vw);
+  min-height: 538px;
+  padding: 34px;
+
+  overflow: hidden;
+  text-align: center;
+  font-family: "Press Start 2P", monospace;
+
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 2px solid rgba(255, 45, 45, 0.8);
+  border-radius: 18px;
+
+  background: linear-gradient(180deg, #0c0c0c, #0d0d0d);
+
+  box-shadow:
+    0 26px 80px rgba(0, 0, 0, 0.7),
+    0 0 35px rgba(190, 0, 0, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* detalhe vermelho no topo do painel */
+.telainicialdentro::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 70%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ff2d2d, transparent);
+  box-shadow: 0 0 18px rgba(255, 45, 45, 0.75);
+}
+
+.infogeneroinicial {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.infogeneroinicial img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(255, 45, 45, 0.22));
+}
+
+.telainicialconteudo {
+  display: flex;
+  align-items: center;
+  gap: 65px;
+}
+
+/* ESTILIZAÇÃO DIV NOME JOGADOR*/
+
+#divnome {
+  width: 100%;
+
+  max-width: 430px;
+
+  margin: 18px auto 35px auto;
+}
+
+.campo-nome {
+  display: flex;
+
+  align-items: center;
+
+  padding: 0 15px;
+
+  background: linear-gradient(180deg, #0e0e0e, #050505);
+
+  border: 1px solid #393939;
+
+  border-radius: 10px;
+
+  transition: 0.25s ease;
+
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
+}
+
+.campo-nome span {
+  color: #9d1c1c;
+
+  font-size: 16px;
+
+  margin-right: 12px;
+
+  transition: 0.25s;
+}
+
+#divnome input {
+  width: 100%;
+
+  padding: 14px 2px;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  color: #f2f2f2;
+
   font-size: 15px;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
+
+  font-weight: 600;
+
+  font-family: "Press Start 2P", monospace;
 }
 
-.tempo-resultado {
-  color: #b1b0b0;
-   font-size: 15px;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
+#divnome input::placeholder {
+  color: #666;
 }
 
-.info{
-  display: flex;
-  flex-direction: column;
-  text-align: start;
-} 
+.campo-nome:focus-within {
+  border-color: #bd2020;
+
+  box-shadow:
+    0 0 10px rgba(201, 32, 32, 0.35),
+    inset 0 0 10px rgba(201, 32, 32, 0.06);
+}
+
+.campo-nome:focus-within span {
+  color: #e12727;
+
+  text-shadow: 0 0 10px rgba(225, 39, 39, 0.7);
+}

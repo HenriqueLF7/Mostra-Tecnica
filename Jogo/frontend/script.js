@@ -124,7 +124,8 @@ let enviandoVertical = false;
 let enviandoHorizontal = false;
 
 function enviarComando(comando, eixo) {
-  const emAndamento = eixo === "vertical" ? enviandoVertical : enviandoHorizontal;
+  const emAndamento =
+    eixo === "vertical" ? enviandoVertical : enviandoHorizontal;
   if (emAndamento) return; // já tem uma requisição desse eixo em voo, não manda outra
 
   if (eixo === "vertical") enviandoVertical = true;
@@ -269,34 +270,38 @@ const intervaloCronometro = setInterval(function () {
   // VERDE
 
   if (tempo < 90) {
-cronometro.style.color = "#00d92e";
-cronometro.style.boxShadow =
-  "0 0 0 2px #006807, 0 0 0 5px #000000, inset 3px 3px 0 #06411a, inset -3px -3px 0 #050505";
-cronometro.style.setProperty("--cor-alerta", "#006807");
-cronometro.style.boxShadow.opacity = 0.50;
+    cronometro.style.color = "#00d92e";
+    cronometro.style.boxShadow =
+      "0 0 0 2px #006807, 0 0 0 5px #000000, inset 3px 3px 0 #06411a, inset -3px -3px 0 #050505";
+    cronometro.style.setProperty("--cor-alerta", "#006807");
+    cronometro.style.boxShadow.opacity = 0.5;
   }
 
   // AMARELO
 
   if (tempo >= 35) {
-cronometro.style.color = "#ffb020";
-cronometro.style.boxShadow =
-  "0 0 0 2px #ffb020, 0 0 0 5px #000000, inset 3px 3px 0 #7a4a00, inset -3px -3px 0 #050505";
-cronometro.style.setProperty("--cor-alerta", "#ffb020");
-cronometro.style.boxShadow.opacity = 0.50;
+    cronometro.style.color = "#ffb020";
+    cronometro.style.boxShadow =
+      "0 0 0 2px #ffb020, 0 0 0 5px #000000, inset 3px 3px 0 #7a4a00, inset -3px -3px 0 #050505";
+    cronometro.style.setProperty("--cor-alerta", "#ffb020");
+    cronometro.style.boxShadow.opacity = 0.5;
   }
 
   // VERMELHO
 
   if (tempo >= 70) {
-cronometro.style.color = "#ff2d2d";
-cronometro.style.boxShadow =
-  "0 0 0 2px #ff2d2d, 0 0 0 5px #000000, inset 3px 3px 0 #4a0000, inset -3px -3px 0 #050505";
-cronometro.style.setProperty("--cor-alerta", "#ff2d2d");
-cronometro.style.boxShadow.opacity = 0.50;
+    cronometro.style.color = "#ff2d2d";
+    cronometro.style.boxShadow =
+      "0 0 0 2px #ff2d2d, 0 0 0 5px #000000, inset 3px 3px 0 #4a0000, inset -3px -3px 0 #050505";
+    cronometro.style.setProperty("--cor-alerta", "#ff2d2d");
+    cronometro.style.boxShadow.opacity = 0.5;
   }
 
   // FIM!
+
+  if (tempo >= 80) {
+    cronometro.style.animation = "tremor 1s infinite";
+  }
 
   if (tempo >= 0) {
     clearInterval(intervaloCronometro);
@@ -322,6 +327,15 @@ cronometro.style.boxShadow.opacity = 0.50;
 btnRecomecar.addEventListener("click", function () {
   location.reload();
 });
+
+// =============================
+// IR PARA TELA INICIAL
+// =============================
+
+function paraTelaInicial() {
+  telaFim.style.display = "none";
+  telaInicial.style.display = "flex";
+}
 
 // =============================
 // POSIÇÃO INICIAL

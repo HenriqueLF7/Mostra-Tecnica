@@ -15,7 +15,7 @@
 <body>
 
     <button id="btnTempo5x">5X TEMPO</button>
-    
+
 
     <div id="game">
 
@@ -31,26 +31,103 @@
 
         <div id="telaFim">
 
-             <h1>GAME OVER</h1>   
+            <h1>GAME OVER</h1>
 
             <div class="telafimdentro">
+
                 <div class="titulo-resultado">
                     RESULTADO
                 </div>
 
                 <div class="info">
 
-                <div class="kills-resultado">
-                    Zumbis mortos: 
+                    <div class="kills-resultado">
+                        <img src="Imagens/zumbimao.png" alt="zumbi">
+                        <span>Zumbis mortos:</span>
+                    </div>
+
+                    <div class="tempo-resultado">
+                        <img src="Imagens/clock.png" alt="reloginho">
+                        <span>Tempo vivo:</span>
+                    </div>
+
                 </div>
 
-                 <div class="tempo-resultado">
-                    Tempo vivo: 
-                </div>
-                
+                <div class="botao-voltar">
+                    <button type="submit" id="b2" name="b2" onclick="paraTelaInicial()">VOLTAR AO MENU</button>
                 </div>
 
-                <button type="submit" id="b2" name="b2">VOLTAR AO MENU</button>
+            </div>
+
+        </div>
+
+        <div id="telaInicial">
+
+            <h1>LAST SURVIVOR</h1>
+
+            <div class="telainicialconteudo">
+
+                <div class="telainicialdentro">
+
+                    <div class="titulo-resultado">
+                        DIGITE O SEU NOME
+                    </div>
+
+                    <!-- Nome do jogador -->
+                    <div id="divnome">
+
+                        <div class="campo-nome">
+                            <span>◉</span>
+
+                            <input type="text" id="nome" name="nome" maxlength="20" placeholder="Digite seu nome...">
+                        </div>
+
+                    </div>
+
+                    <div class="titulo-resultado">
+                        ESCOLHA O SEU GÊNERO
+                    </div>
+
+                    <div class="infogeneroinicial">
+
+
+                        <div class="masculino">
+                            <img src="Imagens/idle.png" alt="Personagem Masculino">
+                            <span>Masculino</span>
+                        </div>
+
+                        <div class="feminino">
+                            <img src="Imagens/idle.png" alt="Personagem Feminino">
+                            <span>Feminino</span>
+                        </div>
+
+                    </div>
+
+                    <div class="botao-voltar">
+                        <button type="submit" id="b2" name="b2" onclick="paraTelaInicial()">VOLTAR AO MENU</button>
+                    </div>
+
+                </div>
+
+
+
+                <div class="tabeladentro">
+
+                    <div class="titulo-resultado">
+                        TABELA
+                    </div>
+
+                    <div class="infoinicial">
+
+                        <div class="kills-resultado">
+                            <img src="Imagens/zumbimao.png" alt="zumbi">
+                            <span>TABELA</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
         </div>
