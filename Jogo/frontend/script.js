@@ -1,12 +1,53 @@
 const player = document.getElementById("player");
 
+
+let jogando = false;
+const telaInicial = document.getElementById("telaInicial");
+
 let playerX = 100;
 let playerY = 100;
 
-const zumbi = document.getElementById("zumbi");
+// --- Zumbis (vários, criados conforme o servidor manda) ---
+const gameEl = document.getElementById("game");
+const FRAMES_ZUMBI = 8;
 
-let zumbiX = 500;
-let zumbiY = 300;
+let zumbisEstado = [];      // [{x, y}, ...] vindo do servidor
+const elementosZumbi = [];  // divs já criados
+let frameZumbi = 0;
+
+function renderizarZumbis() {
+  while (elementosZumbi.length < zumbisEstado.length) {
+    const el = document.createElement("div");
+    el.className = "zumbi";
+    gameEl.appendChild(el);
+    elementosZumbi.push(el);
+  }
+
+  const centroPlayer = playerX + 45;
+
+  elementosZumbi.forEach((el, i) => {
+    const z = zumbisEstado[i];
+
+    if (!z) {
+      el.style.display = "none";
+      return;
+    }
+
+    el.style.display = "block";
+    el.style.left = z.x + "px";
+    el.style.top = z.y + "px";
+    el.style.transform = z.x + 28 > centroPlayer ? "scaleX(-1)" : "scaleX(1)";
+
+    // cada zumbi com um frame diferente, pra não andarem todos sincronizados
+    const f = (frameZumbi + i) % FRAMES_ZUMBI;
+    el.style.backgroundPosition = (f / (FRAMES_ZUMBI - 1)) * 100 + "% 0%";
+  });
+}
+
+setInterval(function () {
+  if (!jogando) return;
+  frameZumbi = (frameZumbi + 1) % FRAMES_ZUMBI;
+}, 100);
 
 const teclas = {
   w: false,
@@ -54,6 +95,7 @@ function atualizarDirecaoPeloMouse() {
 }
 
 document.addEventListener("mousedown", function (event) {
+  if (!jogando) return; 
   if (event.button !== 0) return;
 
   const centroX = playerX + 45;
@@ -62,6 +104,7 @@ document.addEventListener("mousedown", function (event) {
   player.classList.add("mirando");
   player.classList.toggle("mirando-esquerda", ladoMira === "esquerda");
   player.classList.toggle("mirando-direita", ladoMira === "direita");
+  atirar(ladoMira);
 });
 
 document.addEventListener("mouseup", function (event) {
@@ -74,6 +117,31 @@ const spriteAndando = new Image();
 spriteAndando.src = "Imagens/player.png";
 const spriteParado = new Image();
 spriteParado.src = "Imagens/idle.png";
+
+// --- Escolha de gênero ---
+const spriteAndandoFem = new Image();
+spriteAndandoFem.src = "Imagens/player_fem.png";
+const spriteParadoFem = new Image();
+spriteParadoFem.src = "Imagens/idle_fem.png";
+
+let generoEscolhido = "masculino";
+
+const cardMasculino = document.querySelector(".masculino");
+const cardFeminino = document.querySelector(".feminino");
+
+function escolherGenero(genero) {
+  generoEscolhido = genero;
+
+  player.classList.toggle("skin-fem", genero === "feminino");
+  cardMasculino.classList.toggle("selecionado", genero === "masculino");
+  cardFeminino.classList.toggle("selecionado", genero === "feminino");
+}
+
+cardMasculino.addEventListener("click", () => escolherGenero("masculino"));
+cardFeminino.addEventListener("click", () => escolherGenero("feminino"));
+
+// começa com o masculino marcado
+escolherGenero("masculino");
 
 const FRAME_COLS = 8;
 const VELOCIDADE_ANIMACAO = 90;
@@ -156,14 +224,55 @@ function enviarComando(comando, eixo) {
     });
 }
 
+// --- Tiro ---
+let enviandoTiro = false;
+
+function atirar(direcao) {
+  if (enviandoTiro) return;
+
+  enviandoTiro = true;
+
+  const corpo =
+    direcao + ";" + window.innerWidth + ";" + window.innerHeight +
+    ";" + Math.round(mouseX) + ";" + Math.round(mouseY);
+
+  fetch("/tiro", {
+    method: "POST",
+    body: corpo,
+  })
+    .catch((erro) => console.error("Erro ao atirar:", erro))
+    .finally(() => {
+      enviandoTiro = false;
+    });
+}
+
+function atualizarTiros(listaTiros) {
+  document.querySelectorAll(".tiro").forEach((el) => el.remove());
+
+  if (!Array.isArray(listaTiros)) return;
+
+    listaTiros.forEach((t) => {
+    const elemento = document.createElement("div");
+    elemento.className = "tiro";
+    elemento.style.left = t.x + "px";
+    elemento.style.top = t.y + "px";
+    elemento.style.transform = "rotate(" + (t.angulo || 0) + "deg)";
+    document.getElementById("game").appendChild(elemento);
+  });
+}
+
 function atualizarTela() {
   player.style.left = playerX + "px";
   player.style.top = playerY + "px";
 
-  zumbi.style.left = zumbiX + "px";
-  zumbi.style.top = zumbiY + "px";
-
   atualizarDirecaoPeloMouse();
+  renderizarZumbis();
+}
+
+function atualizarVida(pontos) {
+  document.querySelectorAll("#hud-vida .vida").forEach((bolinha, i) => {
+    bolinha.classList.toggle("perdida", i >= pontos);
+  });
 }
 
 // --- Busca de estado, também com trava para não empilhar ---
@@ -181,13 +290,18 @@ setInterval(function () {
         playerY = data.y;
       }
 
-      if (
-        data &&
-        typeof data.zumbiX === "number" &&
-        typeof data.zumbiY === "number"
-      ) {
-        zumbiX = data.zumbiX;
-        zumbiY = data.zumbiY;
+      if (data && Array.isArray(data.zumbis)) {
+        zumbisEstado = data.zumbis;
+      }
+
+      atualizarTiros(data.tiros);
+      atualizarVida(data.pontosVida);
+
+      document.getElementById("hud-onda").textContent =
+        "ONDA " + Math.max(1, data.onda);
+
+      if (jogando && data.pontosVida <= 0) {
+        fimDeJogo();
       }
 
       atualizarTela();
@@ -199,6 +313,7 @@ setInterval(function () {
 }, 50);
 
 setInterval(function () {
+  if (!jogando) return; 
   if (teclas.w) {
     enviarComando("W", "vertical");
   } else if (teclas.s) {
@@ -218,120 +333,104 @@ setInterval(function () {
 
 let tempo = 0;
 let multiplicadorTempo = 1;
+let intervaloCronometro = null;
 
 const cronometro = document.getElementById("cronometro");
 const btnTempo5x = document.getElementById("btnTempo5x");
 
-// =============================
-// BOTÃO 5X
-// =============================
-
 btnTempo5x.addEventListener("click", function () {
   if (multiplicadorTempo === 1) {
     multiplicadorTempo = 5;
-
     btnTempo5x.textContent = "5X ATIVO";
     btnTempo5x.classList.add("ativo");
   } else {
     multiplicadorTempo = 1;
-
     btnTempo5x.textContent = "5X TEMPO";
     btnTempo5x.classList.remove("ativo");
   }
 });
 
-// =============================
-// CRONÔMETRO
-// =============================
+function aplicarCorCronometro(cor, sombraInterna) {
+  cronometro.style.color = cor;
+  cronometro.style.boxShadow =
+    "0 0 0 2px " + cor + ", 0 0 0 5px #000000, inset 3px 3px 0 " +
+    sombraInterna + ", inset -3px -3px 0 #050505";
+  cronometro.style.setProperty("--cor-alerta", cor);
+}
 
-const intervaloCronometro = setInterval(function () {
-  // Aumenta o tempo
+function tickCronometro() {
   tempo += multiplicadorTempo;
+  if (tempo > 90) tempo = 90;
 
-  // Impede passar de 180
-  if (tempo > 180) {
-    tempo = 180;
-  }
-
-  // Calcula minutos
-  const minutos = Math.floor(tempo / 60);
-
-  // Calcula segundos
-  const segundos = tempo % 60;
-
-  // Formata para 00:00
-  const minutosFormatados = String(minutos).padStart(2, "0");
-
-  const segundosFormatados = String(segundos).padStart(2, "0");
-
-  // Mostra na tela
-  cronometro.textContent = minutosFormatados + ":" + segundosFormatados;
-
-  // VERDE
-
-  if (tempo < 90) {
-    cronometro.style.color = "#ffffff";
-    cronometro.style.boxShadow =
-          "0 0 0 2px #42d624, 0 0 0 5px #000000, inset 3px 3px 0 #42d624, inset -3px -3px 0 #050505";
-    cronometro.style.setProperty("--cor-alerta", "#42d624");
-    cronometro.style.boxShadow.opacity = 0.5;
-  }
-
-  // AMARELO
-
-  if (tempo >= 35) {
-    cronometro.style.color = "#ffb020";
-    cronometro.style.boxShadow =
-      "0 0 0 2px #ffb020, 0 0 0 5px #000000, inset 3px 3px 0 #7a4a00, inset -3px -3px 0 #050505";
-    cronometro.style.setProperty("--cor-alerta", "#ffb020");
-    cronometro.style.boxShadow.opacity = 0.5;
-  }
-
-  // VERMELHO
+  const minutos = String(Math.floor(tempo / 60)).padStart(2, "0");
+  const segundos = String(tempo % 60).padStart(2, "0");
+  cronometro.textContent = minutos + ":" + segundos;
 
   if (tempo >= 70) {
-    cronometro.style.color = "#ff2d2d";
-    cronometro.style.boxShadow =
-      "0 0 0 2px #ff2d2d, 0 0 0 5px #000000, inset 3px 3px 0 #4a0000, inset -3px -3px 0 #050505";
-    cronometro.style.setProperty("--cor-alerta", "#ff2d2d");
-    cronometro.style.boxShadow.opacity = 0.5;
+    aplicarCorCronometro("#ff2d2d", "#4a0000");
+  } else if (tempo >= 35) {
+    aplicarCorCronometro("#ffb020", "#7a4a00");
+  } else {
+    aplicarCorCronometro("#42d624", "#42d624");
   }
-
-  // FIM!
 
   if (tempo >= 80) {
     cronometro.style.animation = "tremor 1s infinite";
   }
 
   if (tempo >= 90) {
-    clearInterval(intervaloCronometro);
-
-    cronometro.textContent = "TEMPO ESGOTADO!";
-
-    cronometro.style.zIndex = "10001";
-
-    cronometro.style.display = "none";
-
-    telaFim.style.transition = "0.50s";
-
-    telaFim.style.display = "flex";
-
-    cronometro.style.color = "red";
-
-    cronometro.style.transition = "0.50s";
-
-    btnTempo5x.disabled = true;
+    fimDeJogo();
   }
-}, 1000);
-
-btnRecomecar.addEventListener("click", function () {
-  reiniciarJogo();
-  location.reload();
-});
+}
 
 // =============================
-// IR PARA TELA INICIAL
+// INÍCIO E FIM DO JOGO
 // =============================
+
+function fimDeJogo() {
+  if (!jogando) return;
+  jogando = false;
+
+  clearInterval(intervaloCronometro);
+  fetch("/parar", { method: "POST" });   // servidor congela zumbi e player
+
+  teclas.w = teclas.a = teclas.s = teclas.d = false;
+
+  cronometro.style.display = "none";
+  btnTempo5x.disabled = true;
+  telaFim.style.display = "flex";
+}
+
+async function iniciarJogo() {
+  // servidor: player no centro, zumbi longe, kills e vidas zerados
+  await fetch("/reiniciar", {
+    method: "POST",
+    body: window.innerWidth + ";" + window.innerHeight,
+  });
+  await fetch("/iniciar", { method: "POST" });
+
+  // cliente: zera tudo
+  tempo = 0;
+  multiplicadorTempo = 1;
+  btnTempo5x.textContent = "5X TEMPO";
+  btnTempo5x.classList.remove("ativo");
+  btnTempo5x.disabled = false;
+
+  cronometro.textContent = "00:00";
+  cronometro.style.animation = "none";
+  cronometro.style.display = "block";
+  aplicarCorCronometro("#42d624", "#42d624");
+
+  telaInicial.style.display = "none";
+  telaFim.style.display = "none";
+
+  jogando = true;
+
+  clearInterval(intervaloCronometro);
+  intervaloCronometro = setInterval(tickCronometro, 1000);
+}
+
+btnRecomecar.addEventListener("click", iniciarJogo);
 
 function paraTelaInicial() {
   telaFim.style.display = "none";
@@ -339,11 +438,16 @@ function paraTelaInicial() {
 }
 
 // =============================
-// IR PARA TELA INICIAL
+// AO CARREGAR A PÁGINA
 // =============================
 
-// =============================
-// POSIÇÃO INICIAL
-// =============================
+// mostra a tela inicial e deixa o servidor pausado, com tudo no lugar
+telaInicial.style.display = "flex";
+cronometro.style.display = "none";
+
+fetch("/reiniciar", {
+  method: "POST",
+  body: window.innerWidth + ";" + window.innerHeight,
+});
 
 atualizarTela();

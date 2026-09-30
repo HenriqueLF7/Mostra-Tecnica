@@ -259,11 +259,16 @@ img {
   }
 }
 
-#zumbi {
+.zumbi {
   position: absolute;
-  width: 50px;
-  height: 50px;
-  background-color: green;
+  height: 95px !important;
+  aspect-ratio: 3 / 5;
+  width: auto !important;
+  max-width: none;
+  background-image: url("Imagens/zumbi_walk.png");
+  background-repeat: no-repeat;
+  background-size: 800% 100%;
+  background-position: 0% 0%;
 }
 
 #telaFim {
@@ -1184,4 +1189,87 @@ img {
 
 #btnRecomecar:active {
   transform: translateY(0) scale(0.99);
+}
+
+.tiro {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #ffcc00;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+#hud-vida {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 1000;
+}
+
+#hud-vida .vida {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ff2d2d;
+  border: 3px solid #000;
+  box-shadow: 0 0 0 2px #fff;
+  transition: 0.2s;
+}
+
+#hud-vida .vida.perdida {
+  background: #333;
+  box-shadow: 0 0 0 2px #666;
+}
+
+#telaInicial {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* skin feminina do player */
+#player.skin-fem.idle {
+  background-image: url("Imagens/idle_fem.png");
+}
+
+#player.skin-fem.andando {
+  background-image: url("Imagens/player_fem.png");
+}
+
+#player.skin-fem.mirando {
+  background-image: url("Imagens/player_fem.png");
+}
+
+/* cards de escolha clicáveis */
+.masculino,
+.feminino {
+  cursor: pointer;
+}
+
+.masculino.selecionado,
+.feminino.selecionado {
+  border-color: #ff2d2d;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 45, 45, 0.16),
+    rgba(255, 255, 255, 0.03)
+  );
+  box-shadow:
+    0 0 0 2px #ff2d2d,
+    inset 0 0 24px rgba(0, 0, 0, 0.28);
+}
+
+#hud-onda {
+  position: fixed;
+  top: 62px;
+  left: 20px;
+  z-index: 1000;
+  font-family: "Press Start 2P", monospace;
+  font-size: 14px;
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #000;
 }

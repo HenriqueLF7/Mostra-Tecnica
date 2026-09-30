@@ -23,7 +23,8 @@ javac -encoding UTF-8 -cp "backend\lib\sqlite-jdbc-3.53.4.0.jar" -d "backend\bin
     "backend\src\Main.java" ^
     "backend\src\Database.java" ^
     "backend\src\Zombie.java" ^
-    "backend\src\Player.java"
+    "backend\src\Player.java" ^
+    "backend\src\Tiro.java"
 
 if errorlevel 1 (
     echo.
