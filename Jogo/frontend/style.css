@@ -271,6 +271,7 @@ img {
   background-position: 0% 0%;
 }
 
+
 #telaFim {
   position: fixed;
   inset: 0;
@@ -470,11 +471,10 @@ img {
 
 .kills-resultado:hover,
 .tempo-resultado:hover {
-  transform: translateY(-3px);
-  border-color: rgba(255, 45, 45, 0.35);
+  border-color: rgba(255, 255, 255, 0.1);
   background: linear-gradient(
     145deg,
-    rgba(255, 45, 45, 0.07),
+    rgba(0, 0, 0, 0.07),
     rgba(255, 255, 255, 0.015)
   );
 }
@@ -1203,6 +1203,9 @@ img {
 
 #hud-vida {
   position: fixed;
+  background: #333;
+  border-radius: 20px;
+  padding: 3px 10px 3px 10px;
   top: 20px;
   left: 20px;
   display: flex;
@@ -1211,19 +1214,21 @@ img {
 }
 
 #hud-vida .vida {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #ff2d2d;
-  border: 3px solid #000;
-  box-shadow: 0 0 0 2px #fff;
+  width: 40px;
+  height: 40px;
+  background: url(Imagens/coracaovida.png);
+  background-size: contain;
   transition: 0.2s;
 }
 
 #hud-vida .vida.perdida {
-  background: #333;
-  box-shadow: 0 0 0 2px #666;
+  background: url(Imagens/coracaovidaperdida.png);
+  width: 40px;
+  height: 40px;
+  background-size: contain;
 }
+
+
 
 #telaInicial {
   flex-direction: column;
@@ -1265,7 +1270,7 @@ img {
 
 #hud-onda {
   position: fixed;
-  top: 62px;
+  top: 72px;
   left: 20px;
   z-index: 1000;
   font-family: "Press Start 2P", monospace;
