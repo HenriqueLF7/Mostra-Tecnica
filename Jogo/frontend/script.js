@@ -1,6 +1,5 @@
 const player = document.getElementById("player");
 
-
 let jogando = false;
 const telaInicial = document.getElementById("telaInicial");
 
@@ -11,9 +10,12 @@ let playerY = 100;
 const gameEl = document.getElementById("game");
 const FRAMES_ZUMBI = 8;
 
-let zumbisEstado = [];      // [{x, y}, ...] vindo do servidor
-const elementosZumbi = [];  // divs já criados
+let zumbisEstado = []; // [{x, y}, ...] vindo do servidor
+const elementosZumbi = []; // divs já criados
 let frameZumbi = 0;
+
+// --- Constante da Ranking ( Puxado do HTML ) ---
+const rankingBody = document.getElementById("rankingBody");
 
 function renderizarZumbis() {
   while (elementosZumbi.length < zumbisEstado.length) {
@@ -95,7 +97,7 @@ function atualizarDirecaoPeloMouse() {
 }
 
 document.addEventListener("mousedown", function (event) {
-  if (!jogando) return; 
+  if (!jogando) return;
   if (event.button !== 0) return;
 
   const centroX = playerX + 45;
@@ -233,8 +235,15 @@ function atirar(direcao) {
   enviandoTiro = true;
 
   const corpo =
-    direcao + ";" + window.innerWidth + ";" + window.innerHeight +
-    ";" + Math.round(mouseX) + ";" + Math.round(mouseY);
+    direcao +
+    ";" +
+    window.innerWidth +
+    ";" +
+    window.innerHeight +
+    ";" +
+    Math.round(mouseX) +
+    ";" +
+    Math.round(mouseY);
 
   fetch("/tiro", {
     method: "POST",
@@ -251,7 +260,7 @@ function atualizarTiros(listaTiros) {
 
   if (!Array.isArray(listaTiros)) return;
 
-    listaTiros.forEach((t) => {
+  listaTiros.forEach((t) => {
     const elemento = document.createElement("div");
     elemento.className = "tiro";
     elemento.style.left = t.x + "px";
@@ -313,7 +322,7 @@ setInterval(function () {
 }, 50);
 
 setInterval(function () {
-  if (!jogando) return; 
+  if (!jogando) return;
   if (teclas.w) {
     enviarComando("W", "vertical");
   } else if (teclas.s) {
@@ -353,8 +362,11 @@ btnTempo5x.addEventListener("click", function () {
 function aplicarCorCronometro(cor, sombraInterna) {
   cronometro.style.color = cor;
   cronometro.style.boxShadow =
-    "0 0 0 2px " + cor + ", 0 0 0 5px #000000, inset 3px 3px 0 " +
-    sombraInterna + ", inset -3px -3px 0 #050505";
+    "0 0 0 2px " +
+    cor +
+    ", 0 0 0 5px #000000, inset 3px 3px 0 " +
+    sombraInterna +
+    ", inset -3px -3px 0 #050505";
   cronometro.style.setProperty("--cor-alerta", cor);
 }
 
@@ -384,30 +396,102 @@ function tickCronometro() {
 }
 
 // =============================
+// FUNÇAO DE ATUALIZAR RANKING
+// =============================
+
+async function atualizarRanking() {
+  try {
+    const resposta = await fetch("/ranking");
+
+    const ranking = await resposta.json();
+
+    rankingBody.innerHTML = "";
+
+    ranking.forEach((jogador, index) => {
+      const linha = document.createElement("tr");
+
+      const minutos = Math.floor(jogador.tempo / 60);
+
+      const segundos = jogador.tempo % 60;
+
+      const tempoFormatado =
+        String(minutos).padStart(2, "0") +
+        ":" +
+        String(segundos).padStart(2, "0");
+
+      linha.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${jogador.nome}</td>
+                <td>${jogador.kills}</td>
+                <td>${tempoFormatado}</td>
+            `;
+
+      rankingBody.appendChild(linha);
+    });
+  } catch (erro) {
+    console.error("Erro ao carregar ranking:", erro);
+  }
+}
+
+// =============================
 // INÍCIO E FIM DO JOGO
 // =============================
 
-function fimDeJogo() {
+async function fimDeJogo() {
   if (!jogando) return;
+
   jogando = false;
 
   clearInterval(intervaloCronometro);
-  fetch("/parar", { method: "POST" });   // servidor congela zumbi e player
 
   teclas.w = teclas.a = teclas.s = teclas.d = false;
 
   cronometro.style.display = "none";
   btnTempo5x.disabled = true;
+
+  try {
+    const resposta = await fetch("/parar", {
+      method: "POST",
+    });
+
+    const resultado = await resposta.json();
+
+    console.log("Resultado da partida:", resultado);
+
+    // Mostra o resultado na tela de Game Over
+    // Troque os IDs abaixo pelos IDs dos seus elementos,
+    // caso eles sejam diferentes.
+    document.getElementById("resultadoKills").textContent = resultado.kills;
+
+    const minutos = Math.floor(resultado.tempo / 60);
+    const segundos = resultado.tempo % 60;
+
+    document.getElementById("resultadoTempo").textContent =
+      String(minutos).padStart(2, "0") +
+      ":" +
+      String(segundos).padStart(2, "0");
+  } catch (erro) {
+    console.error("Erro ao obter resultado da partida:", erro);
+  }
+
   telaFim.style.display = "flex";
 }
 
 async function iniciarJogo() {
-  // servidor: player no centro, zumbi longe, kills e vidas zerados
+  // Pega o nome digitado pelo jogador
+  const nome = document.getElementById("nome").value.trim();
+
+  // Servidor: player no centro, zumbi longe, kills e vidas zerados
   await fetch("/reiniciar", {
     method: "POST",
     body: window.innerWidth + ";" + window.innerHeight,
   });
-  await fetch("/iniciar", { method: "POST" });
+
+  // Envia o nome para o servidor
+  await fetch("/iniciar", {
+    method: "POST",
+    body: nome || "Jogador",
+  });
 
   // cliente: zera tudo
   tempo = 0;
@@ -435,6 +519,8 @@ btnRecomecar.addEventListener("click", iniciarJogo);
 function paraTelaInicial() {
   telaFim.style.display = "none";
   telaInicial.style.display = "flex";
+
+  atualizarRanking();
 }
 
 // =============================
@@ -450,4 +536,5 @@ fetch("/reiniciar", {
   body: window.innerWidth + ";" + window.innerHeight,
 });
 
+atualizarRanking();
 atualizarTela();

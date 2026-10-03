@@ -6,10 +6,16 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.List;
 
 public class Main {
 
     private static Player player = new Player(100, 100);
+    private static int jogadorIdAtual = -1;
+private static String nomeJogadorAtual = "";
+private static long inicioPartida = 0;
+private static boolean partidaSalva = false;
     private static java.util.List<Tiro> tiros = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     private static volatile int ultimaLarguraJanela = 1280;
@@ -56,9 +62,11 @@ public class Main {
 
         server.createContext("/reiniciar", Main::reiniciar);
 
-        server.createContext("/iniciar", ex -> definirAtivo(ex, true));
+        server.createContext("/iniciar", Main::iniciar);
         
         server.createContext("/parar", ex -> definirAtivo(ex, false));
+
+        server.createContext("/ranking", Main::ranking);
 
         server.start();
         
@@ -119,7 +127,10 @@ public class Main {
                             player.vidaPlayer(-1);
                             ultimoDanoNoPlayer = agora;
 
-                            if (!player.isVivo()) jogoAtivo = false;
+                            if (!player.isVivo()) {
+                            jogoAtivo = false;
+                            salvarPartida();
+}
                             break;
                         }
                     }
@@ -207,6 +218,95 @@ jogo.start();
 
         exchange.close();
     }
+
+    private static void salvarPartida() {
+
+    if (partidaSalva) {
+        return;
+    }
+
+    if (jogadorIdAtual == -1) {
+        return;
+    }
+
+    partidaSalva = true;
+
+    long agora = System.currentTimeMillis();
+
+    int tempoSegundos = (int) (
+            (agora - inicioPartida) / 1000
+    );
+
+    try {
+
+        Database.salvarPartida(
+                jogadorIdAtual,
+                kills,
+                tempoSegundos
+        );
+
+        System.out.println(
+                "PARTIDA SALVA | Jogador: "
+                + nomeJogadorAtual
+                + " | Kills: "
+                + kills
+                + " | Tempo: "
+                + tempoSegundos
+                + "s"
+        );
+
+    } catch (SQLException e) {
+
+        System.out.println(
+                "ERRO AO SALVAR PARTIDA:"
+        );
+
+        e.printStackTrace();
+    }
+}
+
+    private static void iniciar(HttpExchange exchange) throws IOException {
+
+    String body = new String(
+            exchange.getRequestBody().readAllBytes(),
+            StandardCharsets.UTF_8
+    );
+
+    String nome = body.trim();
+
+    if (nome.isEmpty()) {
+        nome = "Jogador";
+    }
+
+    try {
+
+        jogadorIdAtual = Database.obterOuCriarJogador(nome);
+        nomeJogadorAtual = nome;
+
+        inicioPartida = System.currentTimeMillis();
+        partidaSalva = false;
+
+        jogoAtivo = true;
+
+        exchange.getResponseHeaders()
+                .set("Content-Type", "application/json; charset=UTF-8");
+
+        responder(exchange, """
+            {"ok":true}
+        """);
+
+    } catch (SQLException e) {
+
+        e.printStackTrace();
+
+        exchange.getResponseHeaders()
+                .set("Content-Type", "application/json; charset=UTF-8");
+
+        responder(exchange, """
+            {"ok":false}
+        """);
+    }
+}
 
     private static void player(HttpExchange exchange) throws IOException {
 
@@ -374,21 +474,95 @@ if (exchange.getRequestMethod().equals("POST")) {
         exchange.close();
     }
 
-        private static void definirAtivo(HttpExchange exchange, boolean ativo) throws IOException {
+       private static void definirAtivo(
+        HttpExchange exchange,
+        boolean ativo) throws IOException {
 
-        if (ativo) {
-            // invulnerabilidade de 1s a partir do momento em que o jogo começa
-            ultimoDanoNoPlayer = System.currentTimeMillis();
-        }
-        jogoAtivo = ativo;
-
-        byte[] dados = "{}".getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, dados.length);
-        exchange.getResponseBody().write(dados);
-        exchange.close();
+    if (!ativo && jogoAtivo) {
+        salvarPartida();
     }
 
+    if (ativo) {
+        ultimoDanoNoPlayer = System.currentTimeMillis();
+    }
+
+    jogoAtivo = ativo;
+
+    long tempoFinal = 0;
+
+    if (inicioPartida > 0) {
+        tempoFinal = (System.currentTimeMillis() - inicioPartida) / 1000;
+    }
+
+    String resposta =
+            "{"
+            + "\"kills\":" + kills + ","
+            + "\"tempo\":" + tempoFinal
+            + "}";
+
+    responder(exchange, resposta);
+}
+
+
+private static void ranking(HttpExchange exchange) throws IOException {
+
+    try {
+
+        List<Database.Ranking> ranking =
+                Database.buscarRanking();
+
+        StringBuilder json = new StringBuilder();
+
+        json.append("[");
+
+        for (int i = 0; i < ranking.size(); i++) {
+
+            Database.Ranking r = ranking.get(i);
+
+            if (i > 0) {
+                json.append(",");
+            }
+
+            json.append("{");
+
+            json.append("\"nome\":\"")
+                .append(escaparJson(r.nome))
+                .append("\",");
+
+            json.append("\"kills\":")
+                .append(r.kills)
+                .append(",");
+
+            json.append("\"tempo\":")
+                .append(r.tempoSegundos);
+
+            json.append("}");
+        }
+
+        json.append("]");
+
+        exchange.getResponseHeaders()
+                .set(
+                    "Content-Type",
+                    "application/json; charset=UTF-8"
+                );
+
+        responder(exchange, json.toString());
+
+    } catch (SQLException e) {
+
+        e.printStackTrace();
+
+        responder(exchange, "[]");
+    }
+}
+
+private static String escaparJson(String texto) {
+
+    return texto
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"");
+}
 
     private static void spawnarOnda() {
         onda++;
@@ -478,17 +652,42 @@ if (exchange.getRequestMethod().equals("POST")) {
         return json.append("]").toString();
     }
 
-    private static String tirosParaJson() {
+ private static String tirosParaJson() {
 
-        StringBuilder json = new StringBuilder("[");
+    StringBuilder json = new StringBuilder("[");
 
-        for (int i = 0; i < tiros.size(); i++) {
-            if (i > 0) json.append(",");
-            json.append(tiros.get(i).toJson());
+    for (int i = 0; i < tiros.size(); i++) {
+
+        if (i > 0) {
+            json.append(",");
         }
 
-        json.append("]");
+        json.append(tiros.get(i).toJson());
+    }
 
-        return json.toString();
+    json.append("]");
+
+    return json.toString();
 }
+
+private static void responder(
+        HttpExchange exchange,
+        String resposta) throws IOException {
+
+    byte[] dados = resposta.getBytes(StandardCharsets.UTF_8);
+
+    exchange.getResponseHeaders()
+            .set("Content-Type", "application/json; charset=UTF-8");
+
+    exchange.sendResponseHeaders(
+            200,
+            dados.length
+    );
+
+    exchange.getResponseBody()
+            .write(dados);
+
+    exchange.close();
+}
+
 }

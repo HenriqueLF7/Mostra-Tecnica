@@ -21,13 +21,20 @@
     <div id="game">
 
         <div id="cronometro">00:00</div>
-                <div id="hud-vida">
-            <span class="vida"></span>
-            <span class="vida"></span>
-            <span class="vida"></span>
-        </div>  
-        
-        <div id="hud-onda">ONDA 1</div>
+
+        <div id="hud-vidaonda">
+
+            <div id="hud-vida">
+                <span class="vida"></span>
+                <span class="vida"></span>
+                <span class="vida"></span>
+            </div>
+
+            <div id="hud-onda">ONDA 1</div>
+
+        </div>
+
+
 
         <div id="player"></div>
         <div id="zumbi"></div>
@@ -47,16 +54,28 @@
                     RESULTADO
                 </div>
 
-                <div class="info">
+                <div class="conteudoinfo">
 
-                    <div class="kills-resultado">
-                        <img src="Imagens/zumbimao.png" alt="zumbi">
-                        <span>Zumbis mortos:</span>
+                    <div class="info">
+
+                        <div class="kills-resultado">
+                            <img src="Imagens/zumbimao.png" alt="zumbi">
+                            <span>Zumbis<br> mortos:</span>
+                        </div>
+
+                        <span id="resultadoKills">0</span>
+
                     </div>
 
-                    <div class="tempo-resultado">
-                        <img src="Imagens/clock.png" alt="reloginho">
-                        <span>Tempo vivo:</span>
+                    <div class="info">
+
+                        <div class="tempo-resultado">
+                            <img src="Imagens/clock.png" alt="reloginho">
+                            <span>Tempo<br> vivo:</span>
+                        </div>
+
+                        <span id="resultadoTempo">00:00</span>
+
                     </div>
 
                 </div>
@@ -145,37 +164,7 @@
                                         </tr>
                                     </thead>
 
-                                    <tbody>
-                                        <tr class="ranking-primeiro">
-                                            <td><span class="ranking-posicao">1</span></td>
-                                            <td>HENRIQUE</td>
-                                            <td>02:47</td>
-                                            <td>38</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="ranking-posicao">2</span></td>
-                                            <td>GABRIEL</td>
-                                            <td>02:31</td>
-                                            <td>34</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="ranking-posicao">3</span></td>
-                                            <td>ISAC</td>
-                                            <td>02:18</td>
-                                            <td>29</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="ranking-posicao">4</span></td>
-                                            <td>ROCHA</td>
-                                            <td>01:54</td>
-                                            <td>23</td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="ranking-posicao">5</span></td>
-                                            <td>COLMAN</td>
-                                            <td>01:42</td>
-                                            <td>19</td>
-                                        </tr>
+                                    <tbody id="rankingBody">
                                     </tbody>
                                 </table>
                             </div>

@@ -159,6 +159,13 @@ img {
   animation: tremor 4s infinite;
 }
 
+#hud-vidaonda {
+  position: fixed;
+  width: auto;
+  height: auto;
+  background: black;
+}
+
 /* cantos de mira/scanner + brilho pulsante, por fora da caixa */
 #cronometro::before {
   content: "";
@@ -271,7 +278,6 @@ img {
   background-position: 0% 0%;
 }
 
-
 #telaFim {
   position: fixed;
   inset: 0;
@@ -369,6 +375,33 @@ img {
   z-index: 5;
 }
 
+#resultadoTempo,
+#resultadoKills {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+
+  min-height: 80px;
+  padding: 24px 18px;
+
+  color: #ececec;
+  font-size: 30px;
+  line-height: 1.6;
+  letter-spacing: 0.8px;
+
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
 .telafimdentro {
   position: relative;
   z-index: 1;
@@ -435,9 +468,29 @@ img {
 }
 
 .info {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  min-width: 250px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.28);
+  background: linear-gradient(145deg, #141414, #0d0d0d);
+}
+
+.conteudoinfo {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 30px;
+}
+
+.info:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    145deg,
+    rgba(0, 0, 0, 0.07),
+    rgba(255, 255, 255, 0.015)
+  );
 }
 
 .kills-resultado,
@@ -450,38 +503,23 @@ img {
   align-items: center;
   gap: 16px;
 
-  min-height: 160px;
+  min-height: 200px;
   padding: 24px 18px;
 
   color: #ececec;
-  font-size: clamp(12px, 1.7vw, 16px);
+  font-size: clamp(18px, 1.7vw, 16px);
   line-height: 1.6;
   letter-spacing: 0.8px;
 
-  background: linear-gradient(145deg, #141414, #0d0d0d);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-
-  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.28);
   transition:
     transform 0.2s ease,
     border-color 0.2s ease,
     background 0.2s ease;
 }
 
-.kills-resultado:hover,
-.tempo-resultado:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: linear-gradient(
-    145deg,
-    rgba(0, 0, 0, 0.07),
-    rgba(255, 255, 255, 0.015)
-  );
-}
-
 .info img {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
   filter: drop-shadow(0 0 8px rgba(255, 45, 45, 0.22));
 }
@@ -571,13 +609,6 @@ img {
 
   .info {
     grid-template-columns: 1fr;
-  }
-
-  .kills-resultado,
-  .tempo-resultado {
-    min-height: 110px;
-    flex-direction: row;
-    padding: 18px;
   }
 
   .info img {
@@ -1203,13 +1234,13 @@ img {
 
 #hud-vida {
   position: fixed;
-  background: #333;
+  background: linear-gradient(180deg, #0c0c0cbd, #0d0d0dbd);
   border-radius: 20px;
   padding: 3px 10px 3px 10px;
-  top: 20px;
-  left: 20px;
+  top: 15px;
+  left: 15px;
   display: flex;
-  gap: 10px;
+  gap: 5px;
   z-index: 1000;
 }
 
@@ -1227,8 +1258,6 @@ img {
   height: 40px;
   background-size: contain;
 }
-
-
 
 #telaInicial {
   flex-direction: column;
