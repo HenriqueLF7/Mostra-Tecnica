@@ -1224,9 +1224,10 @@ img {
 
 .tiro {
   position: absolute;
-  width: 6px;
-  height: 6px;
-  background: #ffcc00;
+  width: 20px;
+  height: 8px;
+  border: 2px solid rgb(0, 57, 122);
+  background: #00d9ff;
   border-radius: 50%;
   pointer-events: none;
   transform: translate(-50%, -50%);
