@@ -3,17 +3,26 @@ package jogo.modelo;
 import jogo.util.JsonObject;
 import jogo.util.JsonSerializavel;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Tiro implements JsonSerializavel {
 
     // Posição da ponta da arma em relação ao player
     public static final int MUZZLE_OFFSET_X = 86;
     public static final int MUZZLE_OFFSET_Y = 52;
 
-    private static final double VELOCIDADE = 50;
+    /** Pixels por SEGUNDO. */
+    private static final double VELOCIDADE = 1000;
     private static final int DANO = 1;
+
+    private static final AtomicInteger PROXIMO_ID = new AtomicInteger(1);
+
+    private final int id = PROXIMO_ID.getAndIncrement();
 
     private double x;
     private double y;
+    private double xAnterior;
+    private double yAnterior;
     private final double dirX;      // vetor normalizado
     private final double dirY;
     private final double angulo;    // em graus, pro front girar o sprite
@@ -23,6 +32,8 @@ public class Tiro implements JsonSerializavel {
     private Tiro(double x, double y, double alvoX, double alvoY, Lado lado) {
         this.x = x;
         this.y = y;
+        this.xAnterior = x;
+        this.yAnterior = y;
         this.lado = lado;
 
         double dx = alvoX - x;
@@ -48,21 +59,25 @@ public class Tiro implements JsonSerializavel {
                 : MUZZLE_OFFSET_X;
 
         return new Tiro(
-                player.getX() + offsetX,
-                player.getY() + MUZZLE_OFFSET_Y,
+                player.getXExato() + offsetX,
+                player.getYExato() + MUZZLE_OFFSET_Y,
                 alvoX,
                 alvoY,
                 lado
         );
     }
 
-    public void mover() {
+    /** Anda durante dt segundos. Guarda a posição anterior para testar colisão no caminho todo. */
+    public void mover(double dt) {
         if (!ativo) {
             return;
         }
 
-        x += dirX * VELOCIDADE;
-        y += dirY * VELOCIDADE;
+        xAnterior = x;
+        yAnterior = y;
+
+        x += dirX * VELOCIDADE * dt;
+        y += dirY * VELOCIDADE * dt;
     }
 
     public boolean saiuDaTela(Tela tela) {
@@ -76,12 +91,20 @@ public class Tiro implements JsonSerializavel {
         return fora;
     }
 
-    public int getX() {
-        return (int) x;
+    public double getX() {
+        return x;
     }
 
-    public int getY() {
-        return (int) y;
+    public double getY() {
+        return y;
+    }
+
+    public double getXAnterior() {
+        return xAnterior;
+    }
+
+    public double getYAnterior() {
+        return yAnterior;
     }
 
     public int getDano() {
@@ -95,8 +118,11 @@ public class Tiro implements JsonSerializavel {
     @Override
     public String toJson() {
         return JsonObject.novo()
-                .campo("x", (int) x)
-                .campo("y", (int) y)
+                .campo("id", id)
+                .campo("x", x)
+                .campo("y", y)
+                .campo("vx", (int) Math.round(dirX * VELOCIDADE))
+                .campo("vy", (int) Math.round(dirY * VELOCIDADE))
                 .campo("angulo", (int) angulo)
                 .campo("direcao", lado.texto())
                 .construir();

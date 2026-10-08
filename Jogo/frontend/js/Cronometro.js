@@ -4,7 +4,6 @@ import { formatarTempo } from "./utils.js";
 /** Cronômetro da partida (com o botão de acelerar 5x). Termina quando chega ao tempo máximo. */
 export class Cronometro {
   #elemento = document.getElementById("cronometro");
-  #botao5x = document.getElementById("btnTempo5x");
   #aoTerminar;
 
   #tempo = 0;
@@ -13,14 +12,12 @@ export class Cronometro {
 
   constructor(aoTerminar) {
     this.#aoTerminar = aoTerminar;
-    this.#botao5x.addEventListener("click", () => this.#alternar5x());
   }
 
   iniciar() {
     this.#tempo = 0;
     this.#multiplicador = 1;
     this.#atualizarBotao();
-    this.#botao5x.disabled = false;
 
     this.#elemento.textContent = "00:00";
     this.#elemento.style.animation = "none";
@@ -34,22 +31,14 @@ export class Cronometro {
   parar() {
     clearInterval(this.#intervalo);
     this.#elemento.style.display = "none";
-    this.#botao5x.disabled = true;
   }
 
   esconder() {
     this.#elemento.style.display = "none";
   }
 
-  #alternar5x() {
-    this.#multiplicador = this.#multiplicador === 1 ? 5 : 1;
-    this.#atualizarBotao();
-  }
-
   #atualizarBotao() {
     const ativo = this.#multiplicador !== 1;
-    this.#botao5x.textContent = ativo ? "5X ATIVO" : "5X TEMPO";
-    this.#botao5x.classList.toggle("ativo", ativo);
   }
 
   #tick() {

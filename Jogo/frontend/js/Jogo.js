@@ -31,8 +31,19 @@ export class Jogo {
 
   #jogando = false;
 
-  // trava para não empilhar requisições do mesmo tipo
-  #emAndamento = { vertical: false, horizontal: false, tiro: false, estado: false };
+  // trava para não empilhar requisições de tiro
+  #atirando = false;
+
+  // Controle de teclas: só falamos com o servidor quando as teclas MUDAM
+  // (e um "ainda estou aqui" de tempos em tempos). Uma requisição por vez,
+  // sempre com o estado mais novo, para nunca chegarem fora de ordem.
+  #entrada = { desejado: "-", enviado: "-", emVoo: false };
+
+  // Para ignorar respostas atrasadas do servidor
+  #sessao = null;
+  #versao = -1;
+
+  #ultimoFrame = 0;
 
   /** Liga tudo e deixa o servidor pausado, mostrando o menu. */
   iniciar() {
@@ -46,7 +57,9 @@ export class Jogo {
 
     this.#api.reiniciar();
     this.#atualizarRanking();
-    this.#renderizar();
+
+    this.#ultimoFrame = performance.now();
+    requestAnimationFrame((agora) => this.#desenhar(agora));
   }
 
   // ------------------------------------------------------------
@@ -55,6 +68,7 @@ export class Jogo {
 
   #ligarEventos() {
     this.#teclado.aoRecarregar(() => this.#recarregar());
+    this.#teclado.aoMudar(() => this.#aoMudarTeclas());
 
     this.#mira.aoMover(() => this.#player.olharPara(this.#mira.x));
     this.#mira.aoPressionar(() => this.#aoClicar());
@@ -80,64 +94,72 @@ export class Jogo {
 
   #iniciarRelogios() {
     setInterval(() => {
-      if (this.#jogando) this.#horda.avancarFrame();
-    }, CONFIG.ANIMACAO_ZUMBI_MS);
-
-    setInterval(() => {
       this.#player.animar(this.#teclado.andando);
     }, CONFIG.ANIMACAO_PLAYER_MS);
 
-    setInterval(() => this.#enviarComandos(), CONFIG.ENVIAR_COMANDOS_MS);
-    setInterval(() => this.#sincronizarEstado(), CONFIG.SINCRONIZAR_ESTADO_MS);
+    setInterval(() => this.#batimento(), CONFIG.HEARTBEAT_ENTRADA_MS);
+
+    this.#repetirSincronizacao();
+  }
+
+  /** Busca o estado do servidor sem nunca empilhar pedidos: só pede de novo quando o anterior terminou. */
+  async #repetirSincronizacao() {
+    while (true) {
+      const inicio = performance.now();
+
+      await this.#sincronizarEstado();
+
+      const espera = Math.max(0, CONFIG.SINCRONIZAR_ESTADO_MS - (performance.now() - inicio));
+      await new Promise((resolver) => setTimeout(resolver, espera));
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Teclas de movimento
+  // ------------------------------------------------------------
+
+  #aoMudarTeclas() {
+    this.#entrada.desejado = this.#teclado.comando;
+
+    if (this.#jogando) this.#despacharEntrada();
+  }
+
+  /** Reenvia as teclas apertadas, para o servidor não achar que o navegador travou. */
+  #batimento() {
+    if (!this.#jogando || !this.#teclado.andando) return;
+
+    this.#entrada.enviado = null;
+    this.#despacharEntrada();
+  }
+
+  async #despacharEntrada() {
+    const entrada = this.#entrada;
+
+    if (entrada.emVoo) return;
+    entrada.emVoo = true;
+
+    try {
+      // se as teclas mudarem enquanto a requisição viaja, manda o estado novo logo em seguida
+      while (entrada.enviado !== entrada.desejado) {
+        entrada.enviado = entrada.desejado;
+
+        const dados = await this.#api.enviarComando(entrada.enviado);
+        this.#aplicarEstado(dados);
+      }
+    } catch (erro) {
+      console.error("Erro ao enviar teclas:", erro);
+    } finally {
+      entrada.emVoo = false;
+    }
   }
 
   // ------------------------------------------------------------
   // Comunicação com o servidor
   // ------------------------------------------------------------
 
-  #enviarComandos() {
-    if (!this.#jogando) return;
-
-    if (this.#teclado.cima) {
-      this.#enviarComando("W", "vertical");
-    } else if (this.#teclado.baixo) {
-      this.#enviarComando("S", "vertical");
-    }
-
-    if (this.#teclado.esquerda) {
-      this.#enviarComando("A", "horizontal");
-    } else if (this.#teclado.direita) {
-      this.#enviarComando("D", "horizontal");
-    }
-  }
-
-  async #enviarComando(comando, eixo) {
-    if (this.#emAndamento[eixo]) return;
-    this.#emAndamento[eixo] = true;
-
-    try {
-      const dados = await this.#api.enviarComando(comando);
-
-      if (dados && typeof dados.x === "number" && typeof dados.y === "number") {
-        const larguraMax = window.innerWidth - CONFIG.PLAYER_LARGURA;
-        const alturaMax = window.innerHeight - CONFIG.PLAYER_ALTURA;
-
-        this.#player.definirPosicao(
-          Math.max(0, Math.min(dados.x, larguraMax)),
-          Math.max(0, Math.min(dados.y, alturaMax))
-        );
-        this.#renderizar();
-      }
-    } catch (erro) {
-      console.error("Erro ao enviar comando:", erro);
-    } finally {
-      this.#emAndamento[eixo] = false;
-    }
-  }
-
   async #atirar(lado) {
-    if (this.#emAndamento.tiro) return;
-    this.#emAndamento.tiro = true;
+    if (this.#atirando) return;
+    this.#atirando = true;
 
     try {
       const resposta = await this.#api.atirar(lado, this.#mira.x, this.#mira.y);
@@ -149,7 +171,7 @@ export class Jogo {
     } catch (erro) {
       console.error("Erro ao atirar:", erro);
     } finally {
-      this.#emAndamento.tiro = false;
+      this.#atirando = false;
     }
   }
 
@@ -164,34 +186,44 @@ export class Jogo {
   }
 
   async #sincronizarEstado() {
-    if (this.#emAndamento.estado) return;
-    this.#emAndamento.estado = true;
-
     try {
-      const dados = await this.#api.buscarEstado();
-
-      if (typeof dados.x === "number" && typeof dados.y === "number") {
-        this.#player.definirPosicao(dados.x, dados.y);
-      }
-
-      if (Array.isArray(dados.zumbis)) {
-        this.#horda.atualizar(dados.zumbis);
-      }
-
-      this.#tiros.renderizar(dados.tiros);
-      this.#hud.atualizarVida(dados.pontosVida);
-      this.#hud.atualizarOnda(dados.onda);
-      this.#hud.atualizarMunicao(dados.municao, dados.capacidade, dados.recarregando);
-
-      if (this.#jogando && dados.pontosVida <= 0) {
-        this.#fimDeJogo();
-      }
-
-      this.#renderizar();
+      this.#aplicarEstado(await this.#api.buscarEstado());
     } catch (erro) {
       console.error("Erro ao buscar estado:", erro);
-    } finally {
-      this.#emAndamento.estado = false;
+    }
+  }
+
+  /** Recebe o estado do servidor (de qualquer requisição) e distribui para cada parte do jogo. */
+  #aplicarEstado(dados) {
+    const agora = performance.now();
+
+    // servidor reiniciado: recomeça a contar as versões
+    if (dados.sessao !== this.#sessao) {
+      this.#sessao = dados.sessao;
+      this.#versao = -1;
+    }
+
+    // resposta que ficou para trás (chegou depois de uma mais nova): ignora
+    if (dados.versao < this.#versao) return;
+    this.#versao = dados.versao;
+
+    if (typeof dados.x === "number" && typeof dados.y === "number") {
+      this.#player.receberEstado(dados, agora);
+    }
+
+    this.#player.definirInvulneravel(Boolean(dados.invulneravel));
+
+    if (Array.isArray(dados.zumbis)) {
+      this.#horda.atualizar(dados.zumbis, agora);
+    }
+
+    this.#tiros.atualizar(dados.tiros, agora);
+    this.#hud.atualizarVida(dados.pontosVida);
+    this.#hud.atualizarOnda(dados.onda);
+    this.#hud.atualizarMunicao(dados.municao, dados.capacidade, dados.recarregando);
+
+    if (this.#jogando && dados.pontosVida <= 0) {
+      this.#fimDeJogo();
     }
   }
 
@@ -220,7 +252,17 @@ export class Jogo {
     this.#telaInicial.esconder();
     this.#telaFim.esconder();
 
+    // o personagem nasce no centro: o desenho vai direto para lá, sem deslizar
+    this.#player.pularNoProximoEstado();
+    this.#horda.limpar();
+    this.#tiros.limpar();
+
     this.#jogando = true;
+
+    // se alguma tecla já estava apertada ao começar, avisa o servidor
+    this.#entrada.desejado = this.#teclado.comando;
+    this.#entrada.enviado = null;
+    this.#despacharEntrada();
   }
 
   async #fimDeJogo() {
@@ -229,6 +271,7 @@ export class Jogo {
 
     this.#cronometro.parar();
     this.#teclado.limpar();
+    this.#entrada.desejado = "-";
 
     try {
       this.#telaFim.exibirResultado(await this.#api.parar());
@@ -246,11 +289,19 @@ export class Jogo {
   }
 
   // ------------------------------------------------------------
-  // Desenho
+  // Desenho (um por frame da tela, ~60x/s)
   // ------------------------------------------------------------
 
-  #renderizar() {
+  #desenhar(agora) {
+    // segundos desde o frame anterior (limitado, para um travamento da aba não "teleportar" tudo)
+    const dt = Math.min(Math.max((agora - this.#ultimoFrame) / 1000, 0), 0.05);
+    this.#ultimoFrame = agora;
+
+    this.#player.atualizar(agora, dt);
     this.#player.olharPara(this.#mira.x);
-    this.#horda.renderizar(this.#player.centroX);
+    this.#horda.renderizar(this.#player.centroX, agora, dt);
+    this.#tiros.renderizar(agora, dt);
+
+    requestAnimationFrame((proximo) => this.#desenhar(proximo));
   }
 }

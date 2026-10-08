@@ -8,7 +8,10 @@ import jogo.modelo.Tela;
 /**
  * /player
  *   GET  -> devolve o estado do jogo
- *   POST -> corpo "comando;largura;altura" move o player e devolve o estado
+ *   POST -> corpo "teclas;largura;altura" avisa quais teclas estão apertadas
+ *           (ex.: "WD" = cima + direita, "-" = nenhuma) e devolve o estado.
+ *           Só é preciso mandar quando as teclas MUDAM (e de tempos em tempos,
+ *           para o servidor saber que o front continua vivo).
  */
 public class PlayerHandler extends BaseHandler {
 
@@ -23,10 +26,21 @@ public class PlayerHandler extends BaseHandler {
         if (isPost(exchange)) {
             String[] partes = lerCorpo(exchange).split(";");
 
-            Movimento movimento = Movimento.deComando(partes[0]);
+            int dx = 0;
+            int dy = 0;
+
+            for (char tecla : partes[0].toCharArray()) {
+                Movimento movimento = Movimento.deComando(String.valueOf(tecla));
+
+                if (movimento != null) {
+                    dx += movimento.getDx();
+                    dy += movimento.getDy();
+                }
+            }
+
             Tela tela = new Tela(Integer.parseInt(partes[1]), Integer.parseInt(partes[2]));
 
-            jogo.moverPlayer(movimento, tela);
+            jogo.definirDirecaoPlayer(dx, dy, tela);
         }
 
         responderJson(exchange, jogo.toJson());

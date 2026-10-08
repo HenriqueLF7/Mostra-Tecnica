@@ -13,8 +13,14 @@ import java.util.List;
 /** O grupo de zumbis que estão na tela. */
 public class Horda implements JsonSerializavel {
 
-    private static final int DISTANCIA_ENTRE_ZUMBIS = 80;
-    private static final int EMPURRAO_MAX = 8;
+    /** Dentro dessa distância (entre centros) os zumbis se afastam uns dos outros. */
+    private static final double RAIO_SEPARACAO = 72;
+
+    /** Força máxima do afastamento, em px/s (quando estão colados). */
+    private static final double FORCA_SEPARACAO = 170;
+
+    /** Zumbi é mais alto que largo: a distância vertical "pesa" menos. */
+    private static final double PESO_VERTICAL = 0.7;
 
     private final List<Zombie> zumbis = new ArrayList<>();
 
@@ -38,49 +44,66 @@ public class Horda implements JsonSerializavel {
         zumbis.removeIf(z -> !z.isVivo());
     }
 
-    /** Todos os zumbis dão um passo na direção do player. */
-    public void perseguir(Player player) {
-        for (Zombie z : zumbis) {
-            z.moverEmDirecao(player.getX(), player.getY());
-        }
-    }
-
-    /** Empurra os zumbis que estão perto demais uns dos outros. */
-    public void separar(Tela tela) {
-        for (int i = 0; i < zumbis.size(); i++) {
-            for (int j = i + 1; j < zumbis.size(); j++) {
-                afastarSeMuitoPerto(zumbis.get(i), zumbis.get(j), i, j);
-            }
-        }
-
-        for (Zombie z : zumbis) {
-            z.limitarA(tela);
-        }
-    }
-
-    private void afastarSeMuitoPerto(Zombie a, Zombie b, int i, int j) {
-        double dx = (a.getX() + Zombie.LARGURA / 2.0) - (b.getX() + Zombie.LARGURA / 2.0);
-        double dy = (a.getY() + Zombie.ALTURA / 2.0) - (b.getY() + Zombie.ALTURA / 2.0);
-        double dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist >= DISTANCIA_ENTRE_ZUMBIS) {
+    /**
+     * Um frame da horda: cada zumbi vai atrás do player e, ao mesmo tempo,
+     * é empurrado para longe dos vizinhos. Os dois efeitos viram uma
+     * única velocidade suave (nada de "teleportes" de separação).
+     */
+    public void atualizar(double dt, Player player, Tela tela, long agora) {
+        int total = zumbis.size();
+        if (total == 0) {
             return;
         }
 
-        if (dist < 1) {
-            // exatamente no mesmo ponto: escolhe uma direção qualquer
-            double angulo = i * 31 + j * 17;
-            dx = Math.cos(angulo);
-            dy = Math.sin(angulo);
-            dist = 1;
+        double[] sepX = new double[total];
+        double[] sepY = new double[total];
+
+        for (int i = 0; i < total; i++) {
+            for (int j = i + 1; j < total; j++) {
+                calcularSeparacao(i, j, sepX, sepY);
+            }
         }
 
-        double empurrao = Math.min(EMPURRAO_MAX, (DISTANCIA_ENTRE_ZUMBIS - dist) / 2);
-        int mx = (int) Math.round(dx / dist * empurrao);
-        int my = (int) Math.round(dy / dist * empurrao);
+        double alvoX = player.getCentroX();
+        double alvoY = player.getCentroY();
 
-        a.deslocar(mx, my);
-        b.deslocar(-mx, -my);
+        for (int i = 0; i < total; i++) {
+            Zombie zumbi = zumbis.get(i);
+
+            zumbi.perseguir(dt, alvoX, alvoY, sepX[i], sepY[i], agora);
+            zumbi.limitarA(tela);
+        }
+    }
+
+    private void calcularSeparacao(int i, int j, double[] sepX, double[] sepY) {
+        Zombie a = zumbis.get(i);
+        Zombie b = zumbis.get(j);
+
+        double dx = a.getCentroX() - b.getCentroX();
+        double dy = (a.getCentroY() - b.getCentroY()) * PESO_VERTICAL;
+        double distancia = Math.sqrt(dx * dx + dy * dy);
+
+        if (distancia >= RAIO_SEPARACAO) {
+            return;
+        }
+
+        if (distancia < 0.5) {
+            // exatamente no mesmo ponto: escolhe uma direção qualquer (mas sempre a mesma para o par)
+            double angulo = a.getId() * 31 + b.getId() * 17;
+            dx = Math.cos(angulo);
+            dy = Math.sin(angulo);
+            distancia = 1;
+        }
+
+        // quanto mais perto, mais forte o empurrão
+        double forca = (RAIO_SEPARACAO - distancia) / RAIO_SEPARACAO * FORCA_SEPARACAO;
+        double fx = dx / distancia * forca;
+        double fy = dy / distancia * forca;
+
+        sepX[i] += fx;
+        sepY[i] += fy;
+        sepX[j] -= fx;
+        sepY[j] -= fy;
     }
 
     @Override

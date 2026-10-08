@@ -1,10 +1,14 @@
 import { CONFIG } from "./config.js";
+import { Corpo } from "./Corpo.js";
 
 /** O boneco na tela: posição, direção, animação do sprite e skin. */
 export class PlayerView {
   #elemento;
   #x = 100;
   #y = 100;
+  #corpo = new Corpo(100, 100);
+  #pularProximoEstado = false;
+  #invulneravel = false;
   #frame = 0;
   #estado = null;
   #direcao = null;
@@ -38,6 +42,38 @@ export class PlayerView {
     this.#x = x;
     this.#y = y;
     this.#aplicarPosicao();
+  }
+
+  /** Chegou o estado do servidor (posição + velocidade do player). */
+  receberEstado(dados, agora) {
+    this.#corpo.receber(dados.x, dados.y, dados.vx, dados.vy, agora, this.#pularProximoEstado);
+    this.#pularProximoEstado = false;
+  }
+
+  /** Na próxima resposta o personagem vai direto para a posição (ex.: início da partida). */
+  pularNoProximoEstado() {
+    this.#pularProximoEstado = true;
+  }
+
+  /** A cada frame da tela: anda suavemente e atualiza o elemento. `dt` em segundos. */
+  atualizar(agora, dt) {
+    this.#corpo.atualizar(agora, dt);
+
+    const larguraMax = window.innerWidth - CONFIG.PLAYER_LARGURA;
+    const alturaMax = window.innerHeight - CONFIG.PLAYER_ALTURA;
+
+    this.definirPosicao(
+      Math.round(Math.max(0, Math.min(this.#corpo.x, larguraMax))),
+      Math.round(Math.max(0, Math.min(this.#corpo.y, alturaMax)))
+    );
+  }
+
+  /** Enquanto o player está invulnerável (depois de levar dano) ele pisca. */
+  definirInvulneravel(invulneravel) {
+    if (invulneravel === this.#invulneravel) return;
+
+    this.#invulneravel = invulneravel;
+    this.#elemento.classList.toggle("piscando", invulneravel);
   }
 
   #aplicarPosicao() {

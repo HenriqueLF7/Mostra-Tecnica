@@ -36,6 +36,12 @@ public final class JsonObject {
         return this;
     }
 
+    /** Número decimal com 1 casa (suficiente para posições em pixels). */
+    public JsonObject campo(String nome, double valor) {
+        abrirCampo(nome).append(String.format(java.util.Locale.ROOT, "%.1f", valor));
+        return this;
+    }
+
     public JsonObject campo(String nome, boolean valor) {
         abrirCampo(nome).append(valor);
         return this;

@@ -3,11 +3,14 @@ package jogo.modelo;
 /**
  * Qualquer coisa que ocupa um retângulo na tela (player, zumbi...).
  * Guarda posição e tamanho e sabe calcular colisões.
+ *
+ * A posição é decimal (double) para o movimento ficar suave: com inteiros,
+ * passos pequenos (velocidade x tempo do frame) seriam arredondados para 0.
  */
 public abstract class Entidade {
 
-    protected int x;
-    protected int y;
+    protected double x;
+    protected double y;
     private final int largura;
     private final int altura;
 
@@ -18,11 +21,21 @@ public abstract class Entidade {
         this.altura = altura;
     }
 
+    /** Posição arredondada, em pixels inteiros. */
     public int getX() {
-        return x;
+        return (int) Math.round(x);
     }
 
     public int getY() {
+        return (int) Math.round(y);
+    }
+
+    /** Posição exata (decimal). */
+    public double getXExato() {
+        return x;
+    }
+
+    public double getYExato() {
         return y;
     }
 
@@ -34,7 +47,15 @@ public abstract class Entidade {
         return altura;
     }
 
-    public void deslocar(int dx, int dy) {
+    public double getCentroX() {
+        return x + largura / 2.0;
+    }
+
+    public double getCentroY() {
+        return y + altura / 2.0;
+    }
+
+    public void deslocar(double dx, double dy) {
         this.x += dx;
         this.y += dy;
     }
@@ -46,7 +67,7 @@ public abstract class Entidade {
     }
 
     /** Um ponto (ex.: um tiro) está dentro da hitbox? */
-    public boolean contemPonto(int px, int py) {
+    public boolean contemPonto(double px, double py) {
         return px >= x && px <= x + largura
             && py >= y && py <= y + altura;
     }
