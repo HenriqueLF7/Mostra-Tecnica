@@ -15,6 +15,7 @@
 
 <body>
 
+    <button id="btnTempo5x">5X TEMPO</button>
 
 
     <div id="game">
@@ -40,9 +41,10 @@
 
         <div id="hud-municao">
             <span class="municao"></span>
-            <span class="contagemmunicao">12</span>
+            <span class="contagemmunicao" id="municao-atual">12</span>
             <span class="divisao"></span>
-             <span class="contagemmunicao">12</span>
+            <span class="contagemmunicao" id="municao-capacidade">12</span>
+            <span id="aviso-recarga">RECARREGANDO...</span>
         </div>
 
         <div id="msg">
@@ -87,7 +89,7 @@
                 </div>
 
                 <div class="botao-voltar">
-                    <button type="submit" id="b2" name="b2" onclick="paraTelaInicial()">VOLTAR AO MENU</button>
+                    <button type="submit" id="b2" name="b2">VOLTAR AO MENU</button>
                 </div>
 
             </div>
@@ -137,7 +139,7 @@
                     </div>
 
                     <div class="botao-voltar">
-                        <button type="submit" id="btnRecomecar" name="b2"">COMEÇAR</button>
+                        <button type="submit" id="btnRecomecar" name="b2">COMEÇAR</button>
                     </div>
 
                 </div>
@@ -186,7 +188,7 @@
 
             </div>
 
-            <script src="script.js"></script>
+            <script type="module" src="js/main.js"></script>
 
 </body>
 

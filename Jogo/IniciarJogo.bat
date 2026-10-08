@@ -13,18 +13,13 @@ echo.
 echo Compilando o jogo...
 echo.
 
-if not exist "backend\bin" mkdir "backend\bin"
+:: Limpa compilacoes antigas (inclusive as das subpastas/pacotes)
+if exist "backend\bin" rmdir /s /q "backend\bin"
+mkdir "backend\bin"
 
-:: Limpa compilacoes antigas
-if exist "backend\bin\*.class" del /q "backend\bin\*.class"
-
-:: Compila os arquivos Java do projeto
-javac -encoding UTF-8 -cp "backend\lib\sqlite-jdbc-3.53.4.0.jar" -d "backend\bin" ^
-    "backend\src\Main.java" ^
-    "backend\src\Database.java" ^
-    "backend\src\Zombie.java" ^
-    "backend\src\Player.java" ^
-    "backend\src\Tiro.java"
+:: Compila o projeto a partir do Main. O -sourcepath faz o javac
+:: encontrar sozinho todas as classes dos pacotes (jogo.modelo, jogo.logica...)
+javac -encoding UTF-8 -cp "backend\lib\sqlite-jdbc-3.53.4.0.jar" -sourcepath "backend\src" -d "backend\bin" "backend\src\Main.java"
 
 if errorlevel 1 (
     echo.
