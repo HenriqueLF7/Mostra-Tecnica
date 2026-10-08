@@ -119,6 +119,67 @@ const spriteAndando = new Image();
 spriteAndando.src = "Imagens/player.png";
 const spriteParado = new Image();
 spriteParado.src = "Imagens/idle.png";
+const spriteAtirando = new Image();
+spriteAtirando.src = "Imagens/firehomem.png";
+
+// --- Animação do tiro (firehomem.png, 40ms por frame) ---
+const FRAMES_TIRO = 2; // firehomem.png: tiro pra frente + recuo da arma
+// cada quadro mede 925x674 px; com 100px de altura (altura do player) fica com ~137px de largura
+const ALTURA_PLAYER = 100;
+const LARGURA_PLAYER = 90;
+const LARGURA_QUADRO_TIRO = Math.round((ALTURA_PLAYER * 925) / 674);
+// quando o player olha pra esquerda (espelhado), desloca o elemento para o personagem não "pular"
+const DESLOCAMENTO_ESQUERDA = LARGURA_QUADRO_TIRO - LARGURA_PLAYER - 1;
+const DURACAO_TIRO = 500; // a animação inteira dura meio segundo
+const VELOCIDADE_TIRO = DURACAO_TIRO / FRAMES_TIRO; // tempo de cada quadro (250ms com 2 quadros)
+
+let atirandoAnimacao = false;
+let frameTiro = 0;
+let intervaloTiro = null;
+
+function desenharFrameTiro() {
+  const colPercent = FRAMES_TIRO > 1 ? (frameTiro / (FRAMES_TIRO - 1)) * 100 : 0;
+  player.style.backgroundPosition = colPercent + "% 0%";
+}
+
+let timeoutTiro = null; // (não usado mais: a animação termina sozinha após o último quadro)
+
+function iniciarAnimacaoTiro() {
+  atirandoAnimacao = true;
+  frameTiro = 0;
+
+  // se atirar de novo durante a animação, ela recomeça do primeiro quadro
+  player.style.backgroundImage = 'url("Imagens/firehomem.png")';
+  player.style.width = LARGURA_QUADRO_TIRO + "px";
+  player.style.backgroundSize = FRAMES_TIRO * 100 + "% 100%";
+  player.style.imageRendering = "pixelated";
+  desenharFrameTiro();
+
+  clearInterval(intervaloTiro);
+  // toca os quadros UMA vez (40ms cada) e termina, sem loop
+  intervaloTiro = setInterval(function () {
+    frameTiro++;
+    if (frameTiro >= FRAMES_TIRO) {
+      pararAnimacaoTiro();
+      return;
+    }
+    desenharFrameTiro();
+  }, VELOCIDADE_TIRO);
+}
+
+function pararAnimacaoTiro() {
+  if (!atirandoAnimacao) return;
+  atirandoAnimacao = false;
+  clearInterval(intervaloTiro);
+  clearTimeout(timeoutTiro);
+
+  // remove os estilos inline para voltar ao sprite de idle/andando do CSS
+  player.style.backgroundImage = "";
+  player.style.backgroundSize = "";
+  player.style.width = "";
+  player.style.imageRendering = "";
+  atualizarFrame();
+}
 
 // --- Escolha de gênero ---
 const spriteAndandoFem = new Image();
@@ -179,6 +240,9 @@ function atualizarFrame() {
 
 setInterval(function () {
   const estaAndando = teclas.w || teclas.a || teclas.s || teclas.d;
+
+  // enquanto atira, a animação do tiro (40ms) controla o sprite
+  if (atirandoAnimacao) return;
 
   if (estaAndando) {
     definirEstado("andando");
@@ -249,6 +313,10 @@ function atirar(direcao) {
     method: "POST",
     body: corpo,
   })
+    .then((response) => {
+      // só anima quando o servidor realmente soltou o tiro (bolinha)
+      if (response.ok) iniciarAnimacaoTiro();
+    })
     .catch((erro) => console.error("Erro ao atirar:", erro))
     .finally(() => {
       enviandoTiro = false;
@@ -271,7 +339,9 @@ function atualizarTiros(listaTiros) {
 }
 
 function atualizarTela() {
-  player.style.left = playerX + "px";
+  const deslocamento =
+    atirandoAnimacao && direcaoAtual === "esquerda" ? DESLOCAMENTO_ESQUERDA : 0;
+  player.style.left = playerX - deslocamento + "px";
   player.style.top = playerY + "px";
 
   atualizarDirecaoPeloMouse();
@@ -370,7 +440,7 @@ function tickCronometro() {
   } else if (tempo >= 35) {
     aplicarCorCronometro("#ffb020", "#7a4a00");
   } else {
-    aplicarCorCronometro("#42d624", "#42d624");
+    aplicarCorCronometro("#32dd10", "#23af07");
   }
 
   if (tempo >= 80) {

@@ -1188,13 +1188,11 @@ img {
 
 .tiro {
   position: absolute;
-  width: 20px;
-  height: 8px;
-  border: 2px solid rgb(0, 57, 122);
-  background: #00d9ff;
+  width: 17px;
+  height: 10px;
+  border: 4px solid #FFB300;
+  background: radial-gradient(circle at 50% 50%, #FFFFFF 0%, #FFF176 35%, #FFD600 100%);
   border-radius: 50%;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
 }
 
 #hud-vida {
