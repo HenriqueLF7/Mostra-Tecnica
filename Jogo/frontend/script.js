@@ -345,19 +345,6 @@ let multiplicadorTempo = 1;
 let intervaloCronometro = null;
 
 const cronometro = document.getElementById("cronometro");
-const btnTempo5x = document.getElementById("btnTempo5x");
-
-btnTempo5x.addEventListener("click", function () {
-  if (multiplicadorTempo === 1) {
-    multiplicadorTempo = 5;
-    btnTempo5x.textContent = "5X ATIVO";
-    btnTempo5x.classList.add("ativo");
-  } else {
-    multiplicadorTempo = 1;
-    btnTempo5x.textContent = "5X TEMPO";
-    btnTempo5x.classList.remove("ativo");
-  }
-});
 
 function aplicarCorCronometro(cor, sombraInterna) {
   cronometro.style.color = cor;
@@ -447,7 +434,6 @@ async function fimDeJogo() {
   teclas.w = teclas.a = teclas.s = teclas.d = false;
 
   cronometro.style.display = "none";
-  btnTempo5x.disabled = true;
 
   try {
     const resposta = await fetch("/parar", {
@@ -496,9 +482,6 @@ async function iniciarJogo() {
   // cliente: zera tudo
   tempo = 0;
   multiplicadorTempo = 1;
-  btnTempo5x.textContent = "5X TEMPO";
-  btnTempo5x.classList.remove("ativo");
-  btnTempo5x.disabled = false;
 
   cronometro.textContent = "00:00";
   cronometro.style.animation = "none";

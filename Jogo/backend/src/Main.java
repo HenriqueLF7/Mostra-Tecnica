@@ -22,7 +22,7 @@ private static boolean partidaSalva = false;
     private static volatile int ultimaAlturaJanela = 720;
 
     // controle simples do cooldown de 2s entre tiros
-    private static final long COOLDOWN_TIRO_MS = 2000;
+    private static final long COOLDOWN_TIRO_MS = 1000;
     private static long ultimoDisparo = -COOLDOWN_TIRO_MS;
 
     private static int kills = 0;
