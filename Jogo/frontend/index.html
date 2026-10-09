@@ -112,8 +112,11 @@
                         <div class="campo-nome">
                             <span>◉</span>
 
-                            <input type="text" id="nome" name="nome" maxlength="20" placeholder="Digite seu nome...">
+                            <input type="text" id="nome" name="nome" maxlength="20" placeholder="Digite seu nome..."
+                                required autocomplete="off">
                         </div>
+
+                        <div id="erro-nome">⚠ DIGITE SEU NOME PARA COMEÇAR</div>
 
                     </div>
 
@@ -146,47 +149,47 @@
 
                 <div class=" tabeladentro">
 
-                            <div class="titulo-resultado">
-                                RANKING DE SOBREVIVENTES
-                            </div>
+                    <div class="titulo-resultado">
+                        RANKING DE SOBREVIVENTES
+                    </div>
 
-                            <div class="ranking-topo">
-                                <img src="Imagens/zumbimao.png" alt="zumbi">
-                                <div>
-                                    <span class="ranking-legenda">MELHORES PARTIDAS</span>
-                                    <strong>TOP 5</strong>
-                                </div>
-                            </div>
+                    <div class="ranking-topo">
+                        <img src="Imagens/zumbimao.png" alt="zumbi">
+                        <div>
+                            <span class="ranking-legenda">MELHORES PARTIDAS</span>
+                            <strong>TOP 5</strong>
+                        </div>
+                    </div>
 
-                            <div class="ranking-wrapper">
-                                <table class="ranking-tabela">
+                    <div class="ranking-wrapper">
+                        <table class="ranking-tabela">
 
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>JOGADOR</th>
-                                            <th>KILLS</th>
-                                            <th>TEMPO</th>
-                                        </tr>
-                                    </thead>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>JOGADOR</th>
+                                    <th>KILLS</th>
+                                    <th>TEMPO</th>
+                                </tr>
+                            </thead>
 
-                                    <tbody id="rankingBody">
-                                    </tbody>
-                                </table>
-                            </div>
+                            <tbody id="rankingBody">
+                            </tbody>
+                        </table>
+                    </div>
 
-                            <div class="ranking-rodape">
-                                <span>SEU MELHOR:</span>
-                                <strong>--:--</strong>
-                            </div>
-
+                    <div class="ranking-rodape">
+                        <span>MELHOR JOGADOR:</span>
+                        <strong id="melhorJogador">--</strong>
                     </div>
 
                 </div>
 
             </div>
 
-            <script type="module" src="js/main.js"></script>
+        </div>
+
+        <script type="module" src="js/main.js"></script>
 
 </body>
 

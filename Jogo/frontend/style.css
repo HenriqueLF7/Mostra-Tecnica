@@ -106,15 +106,18 @@ img {
 
   top: 20px;
   left: 50%;
+  
+  min-width: 190px;
 
   transform: translateX(-50%);
 
   color: #ff0000;
 
   font-family: "Press Start 2P", monospace;
-  font-size: 22px;
+  font-size: 30px;
+  text-align: center;
 
-  background: #0e0e0e;
+  background: #0e0e0ee0;
 
   border: 4px solid #020202;
   box-shadow:
@@ -916,6 +919,45 @@ img {
   transition: 0.25s;
 }
 
+/* nome obrigatório */
+/* nome obrigatório */
+.campo-nome.erro {
+  border-color: #ff2d2d;
+  box-shadow: 0 0 12px rgba(255, 45, 45, 0.55);
+  animation: tremer-campo 0.35s linear;
+}
+
+#erro-nome {
+  display: none;
+  margin-top: 10px;
+  color: #ff2d2d;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+#erro-nome.visivel {
+  display: block;
+}
+
+@keyframes tremer-campo {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
 #divnome input {
   width: 100%;
 
@@ -1075,6 +1117,36 @@ img {
   color: #fff;
 }
 
+
+/* Destaque para o Top 1 do ranking */
+.ranking-tabela tbody tr:first-child {
+    position: relative;
+    border-left: 3px solid rgba(255, 45, 45, 0.5);
+    border-radius: 3px;
+
+    box-shadow:
+        inset 5px 0 8px -3px rgba(255, 45, 45, 0.16),
+        -6px 0 15px rgba(255, 45, 45, 0.35),;
+
+    background: linear-gradient(
+        90deg,
+        rgba(255, 45, 45, 0.16),0%,
+        rgba(255, 45, 45, 0.06), 35%,
+        transparent 100%
+    );
+}
+
+/* Borda dourada nas células da primeira linha */
+.ranking-tabela tbody tr:first-child td {
+    border-top: 1px solid rgba(255, 45, 45, 0.16);
+    border-bottom: 1px solid rgba(255, 45, 45, 0.16);
+}
+
+/* Brilho no nome do primeiro colocado */
+.ranking-tabela tbody tr:first-child td:nth-child(2) {
+    font-weight: bold;
+}
+
 .ranking-posicao {
   display: inline-flex;
   align-items: center;
@@ -1085,6 +1157,25 @@ img {
   color: #aaa;
   background: #151515;
   border: 1px solid #2b2b2b;
+}
+
+
+.ranking-tabela tbody tr:first-child {
+    animation: brilhoTop1 2s ease-in-out infinite alternate;
+}
+
+@keyframes brilhoTop1 {
+    from {
+        box-shadow:
+            inset 5px 0 8px -3px rgba(255, 45, 45, 0.5),
+            -3px 0 8px rgba(255, 45, 45, 0.15);
+    }
+
+    to {
+        box-shadow:
+            inset 8px 0 14px -3px rgb(255, 0, 0),
+            -8px 0 20px rgba(255, 0, 0, 0.5);
+    }
 }
 
 .ranking-primeiro td {
@@ -1112,7 +1203,7 @@ img {
 }
 
 .ranking-rodape strong {
-  color: #ff2d2d;
+  color: #ff2424;
   font-size: 10px;
 }
 
@@ -1226,6 +1317,8 @@ img {
 #hud-vida {
   position: fixed;
   background: linear-gradient(180deg, #0c0c0cbd, #0d0d0dbd);
+  min-width: 206px;
+  min-height: 57px;
   border-radius: 20px;
   padding: 3px 10px 3px 10px;
   top: 15px;
@@ -1236,8 +1329,8 @@ img {
 }
 
 #hud-vida .vida {
-  width: 40px;
-  height: 40px;
+  width: 57px;
+  height: 57px;
   background: url(Imagens/coracaovida.png);
   background-size: contain;
   transition: 0.2s;
@@ -1245,8 +1338,8 @@ img {
 
 #hud-vida .vida.perdida {
   background: url(Imagens/coracaovidaperdida.png);
-  width: 40px;
-  height: 40px;
+    width: 57px;
+  height: 57px;
   background-size: contain;
 }
 
@@ -1327,11 +1420,11 @@ img {
 
 #hud-onda {
   position: fixed;
-  top: 72px;
+  top: 90px;
   left: 20px;
   z-index: 1000;
   font-family: "Press Start 2P", monospace;
-  font-size: 14px;
+  font-size: 17px;
   color: #ffffff;
   text-shadow: 2px 2px 0 #000;
 }
