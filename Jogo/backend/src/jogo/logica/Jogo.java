@@ -1,5 +1,6 @@
 package jogo.logica;
 
+import jogo.banco.BancoException;
 import jogo.banco.JogadorRepository;
 import jogo.banco.PartidaRepository;
 import jogo.modelo.Lado;
@@ -12,7 +13,6 @@ import jogo.util.Json;
 import jogo.util.JsonObject;
 import jogo.util.JsonSerializavel;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -77,7 +77,7 @@ public class Jogo implements JsonSerializavel {
     }
 
     /** Registra o jogador no banco e começa a partida. */
-    public synchronized void iniciar(String nome) throws SQLException {
+    public synchronized void iniciar(String nome) throws BancoException {
         String nomeFinal = (nome == null || nome.isBlank()) ? NOME_PADRAO : nome.trim();
 
         int jogadorId = jogadores.obterOuCriar(nomeFinal);
@@ -116,7 +116,7 @@ public class Jogo implements JsonSerializavel {
             System.out.println("PARTIDA SALVA | Jogador: " + partida.getNomeJogador()
                     + " | Kills: " + partida.getKills()
                     + " | Tempo: " + tempo + "s");
-        } catch (SQLException e) {
+        } catch (BancoException e) {
             System.out.println("ERRO AO SALVAR PARTIDA:");
             e.printStackTrace();
         }

@@ -1,10 +1,10 @@
 package jogo.servidor;
 
+import jogo.banco.BancoException;
 import com.sun.net.httpserver.HttpExchange;
 import jogo.banco.PartidaRepository;
 import jogo.util.Json;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /** GET /ranking — top 5 partidas. */
@@ -21,7 +21,7 @@ public class RankingHandler extends BaseHandler {
         try {
             responderJson(exchange, Json.array(partidas.buscarRanking()));
 
-        } catch (SQLException e) {
+        } catch (BancoException e) {
             e.printStackTrace();
             responderJson(exchange, "[]");
         }

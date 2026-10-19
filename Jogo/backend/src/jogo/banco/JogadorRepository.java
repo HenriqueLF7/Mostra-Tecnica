@@ -1,12 +1,11 @@
 package jogo.banco;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import jogo.util.Json;
 
-/** Acesso à tabela "jogadores". */
+import java.util.List;
+import java.util.Map;
+
+/** Acesso à tabela "jogadores" no Supabase. */
 public class JogadorRepository {
 
     private final ConexaoBanco banco;
@@ -16,36 +15,18 @@ public class JogadorRepository {
     }
 
     /** Retorna o id do jogador com esse nome, cadastrando-o se ainda não existir. */
-    public int obterOuCriar(String nome) throws SQLException {
-        try (Connection conexao = banco.conectar()) {
+    public int obterOuCriar(String nome) throws BancoException {
+        String corpo = "{\"nome\": \"" + Json.escapar(nome) + "\"}";
 
-            try (PreparedStatement stmt = conexao.prepareStatement(
-                    "SELECT id FROM jogadores WHERE nome = ?")) {
+        // Upsert: se o nome já existe, devolve a linha existente; senão cria.
+        Object resp = banco.post("/rest/v1/jogadores?on_conflict=nome", corpo,
+                "resolution=merge-duplicates,return=representation");
 
-                stmt.setString(1, nome);
-
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt("id");
-                    }
-                }
-            }
-
-            try (PreparedStatement stmt = conexao.prepareStatement(
-                    "INSERT INTO jogadores (nome) VALUES (?)",
-                    Statement.RETURN_GENERATED_KEYS)) {
-
-                stmt.setString(1, nome);
-                stmt.executeUpdate();
-
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        return rs.getInt(1);
-                    }
-                }
-            }
+        if (resp instanceof List<?> lista && !lista.isEmpty()
+                && lista.get(0) instanceof Map<?, ?> linha
+                && linha.get("id") instanceof Number id) {
+            return id.intValue();
         }
-
-        throw new SQLException("Não foi possível criar o jogador.");
+        throw new BancoException("Não foi possível criar o jogador.");
     }
 }

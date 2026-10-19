@@ -11,13 +11,13 @@ import java.nio.file.Path;
 public class Main {
 
     private static final int PORTA = 8080;
-    private static final String ARQUIVO_BANCO = "backend/database/jogo.db";
+    private static final Path ARQUIVO_CONFIG = Path.of("supabase.properties");
     private static final Path PASTA_FRONTEND = Path.of("frontend");
 
     public static void main(String[] args) throws Exception {
 
-        ConexaoBanco banco = new ConexaoBanco(ARQUIVO_BANCO);
-        banco.criarTabelas();
+        ConexaoBanco banco = new ConexaoBanco(ARQUIVO_CONFIG);
+        banco.verificar();
 
         JogadorRepository jogadores = new JogadorRepository(banco);
         PartidaRepository partidas = new PartidaRepository(banco);

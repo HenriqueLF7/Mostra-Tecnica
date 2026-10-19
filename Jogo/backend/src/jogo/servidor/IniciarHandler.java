@@ -1,9 +1,9 @@
 package jogo.servidor;
 
+import jogo.banco.BancoException;
 import com.sun.net.httpserver.HttpExchange;
 import jogo.logica.Jogo;
 
-import java.sql.SQLException;
 
 /** POST /iniciar  corpo: nome do jogador — começa a partida. */
 public class IniciarHandler extends BaseHandler {
@@ -20,7 +20,7 @@ public class IniciarHandler extends BaseHandler {
             jogo.iniciar(lerCorpo(exchange));
             responderJson(exchange, "{\"ok\":true}");
 
-        } catch (SQLException e) {
+        } catch (BancoException e) {
             e.printStackTrace();
             responderJson(exchange, "{\"ok\":false}");
         }

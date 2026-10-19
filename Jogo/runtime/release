@@ -1,0 +1,2 @@
+JAVA_VERSION="21.0.5"
+MODULES="java.base java.compiler java.logging java.net.http jdk.internal.opt jdk.zipfs jdk.compiler jdk.crypto.ec jdk.httpserver"
